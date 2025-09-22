@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.professor.grade.mapper.ProfessorGradeMapper">
+	
+	   
+	<resultMap id="grdMap" type="kr.or.ddit.pfcp.common.vo.GradeVO">
+        <id property="gradeNo" column="GRADE_NO"/>
+        <result property="lecNo" column="LEC_NO"/>
+        <result property="userNo" column="USER_NO"/>
+        <result property="finalGrade" column="FINAL_GRADE"/>
+        <result property="gradeDate" column="GRADE_DATE"/>
+        <result property="midtermScore" column="MIDTERM_SCORE"/>
+        <result property="finalScore" column="FINAL_SCORE"/>
+        <result property="assignmentScore" column="ASSIGNMENT_SCORE"/>
+        <result property="attendanceScore" column="ATTENDANCE_SCORE"/>
+        <result property="submitScore" column="SUBMIT_SCORE"/>
+        <result property="finalGradeAlpha" column="FINAL_GRADE_ALPHA"/> <result property="enrollNo" column="ENROLL_NO"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="departmentName" column="DEPARTMENT_NAME"/>
+        <result property="subjectName" column="SUBJECT_NAME"/>
+    </resultMap>
+    
+    <select id="selectStuGrade" parameterType="map" resultMap="grdMap">
+		SELECT
+		    LE.ENROLL_NO,
+		    U.USER_NO,
+		    U.USER_NAME,
+		    D.DEPARTMENT_NAME,
+		    G.GRADE_NO,
+		    G.MIDTERM_SCORE,
+		    G.FINAL_SCORE,
+		    CALC_SCORES.ASSIGNMENT_SCORE,
+		    CALC_SCORES.ATTENDANCE_SCORE,
+		    CALC_SCORES.CALCULATED_FINAL_GRADE AS FINAL_GRADE,
+		    CASE
+		        WHEN CALC_SCORES.CALCULATED_FINAL_GRADE >= 95 THEN 'A+'
+		        WHEN CALC_SCORES.CALCULATED_FINAL_GRADE >= 90 THEN 'A0'
+		        WHEN CALC_SCORES.CALCULATED_FINAL_GRADE >= 85 THEN 'B+'
+		        WHEN CALC_SCORES.CALCULATED_FINAL_GRADE >= 80 THEN 'B0'
+		        WHEN CALC_SCORES.CALCULATED_FINAL_GRADE >= 75 THEN 'C+'
+		        WHEN CALC_SCORES.CALCULATED_FINAL_GRADE >= 70 THEN 'C0'
+		        WHEN CALC_SCORES.CALCULATED_FINAL_GRADE >= 65 THEN 'D+'
+		        WHEN CALC_SCORES.CALCULATED_FINAL_GRADE >= 60 THEN 'D0'
+		        ELSE 'F'
+		    END AS FINAL_GRADE_ALPHA,
+		    G.GRADE_DATE,
+		    L.LEC_NO,
+		    S.SUBJECT_NAME
+		FROM LECTURE_ENR LE
+		JOIN TB_USER U ON LE.USER_NO = U.USER_NO
+		JOIN STUDENT ST ON U.USER_NO = ST.USER_NO
+		JOIN DEPARTMENT D ON ST.DEPARTMENT_NO = D.DEPARTMENT_NO
+		LEFT JOIN GRADE G ON LE.LEC_NO = G.LEC_NO AND LE.USER_NO = G.USER_NO
+		JOIN LECTURE L ON LE.LEC_NO = L.LEC_NO
+		JOIN LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO
+		JOIN SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE
+		JOIN (
+		    SELECT
+		        LE_INNER.LEC_NO,
+		        LE_INNER.USER_NO,
+		        (
+		            SELECT NVL(SUM(SUB_AS.SUBMIT_SCORE), 0)
+		            FROM ASSIGN_SUBMISSION SUB_AS
+		            JOIN ASSIGNMENT SUB_A ON SUB_AS.ASSIGN_NO = SUB_A.ASSIGN_NO
+		            WHERE SUB_A.LEC_NO = LE_INNER.LEC_NO
+		              AND SUB_AS.STUDENT_NO = LE_INNER.USER_NO
+		        ) AS ASSIGNMENT_SCORE,
+		        (
+		            SELECT
+		                ROUND(
+		                    (( (SUB_S.CREDIT * 15) - (COUNT(CASE SUB_A_ATTEND.ATTEND_STATUS WHEN '지각' THEN 1 END) + SUB_S.CREDIT * COUNT(CASE SUB_A_ATTEND.ATTEND_STATUS WHEN '결석' THEN 1 END)) ) / (SUB_S.CREDIT * 15.0)) * 100
+		                    , 0)
+		            FROM ATTENDANCE SUB_A_ATTEND
+		            JOIN LECTURE_ENR SUB_LE ON SUB_A_ATTEND.ENROLL_NO = SUB_LE.ENROLL_NO
+		            JOIN LECTURE SUB_L ON SUB_LE.LEC_NO = SUB_L.LEC_NO
+		            JOIN LECTURE_REQ SUB_LR ON SUB_L.REQ_NO = SUB_LR.REQ_NO -- ⭐ 이 부분을 수정했습니다! ⭐
+		            JOIN SUBJECT SUB_S ON SUB_LR.SUBJECT_CODE = SUB_S.SUBJECT_CODE
+		            WHERE SUB_LE.LEC_NO = LE_INNER.LEC_NO
+		              AND SUB_LE.USER_NO = LE_INNER.USER_NO
+		            GROUP BY SUB_S.CREDIT
+		        ) AS ATTENDANCE_SCORE,
+		        ROUND(
+		            (NVL(G_INNER.MIDTERM_SCORE, 0) * 0.35) +
+		            (NVL(G_INNER.FINAL_SCORE, 0) * 0.35) +
+		            (
+		                SELECT NVL(SUM(SUB_AS_TOTAL.SUBMIT_SCORE), 0)
+		                FROM ASSIGN_SUBMISSION SUB_AS_TOTAL
+		                JOIN ASSIGNMENT SUB_A_TOTAL ON SUB_AS_TOTAL.ASSIGN_NO = SUB_A_TOTAL.ASSIGN_NO
+		                WHERE SUB_A_TOTAL.LEC_NO = LE_INNER.LEC_NO
+		                  AND SUB_AS_TOTAL.STUDENT_NO = LE_INNER.USER_NO
+		            ) * 0.20 +
+		            (
+		                SELECT
+		                    ROUND(
+		                        (( (SUB_S_TOTAL.CREDIT * 15) - (COUNT(CASE SUB_A_ATTEND_TOTAL.ATTEND_STATUS WHEN '지각' THEN 1 END) + SUB_S_TOTAL.CREDIT * COUNT(CASE SUB_A_ATTEND_TOTAL.ATTEND_STATUS WHEN '결석' THEN 1 END)) ) / (SUB_S_TOTAL.CREDIT * 15.0)) * 100
+		                        , 0)
+		                FROM ATTENDANCE SUB_A_ATTEND_TOTAL
+		                JOIN LECTURE_ENR SUB_LE_TOTAL ON SUB_A_ATTEND_TOTAL.ENROLL_NO = SUB_LE_TOTAL.ENROLL_NO
+		                JOIN LECTURE SUB_L_TOTAL ON SUB_LE_TOTAL.LEC_NO = SUB_L_TOTAL.LEC_NO
+		                JOIN LECTURE_REQ SUB_LR_TOTAL ON SUB_L_TOTAL.REQ_NO = SUB_LR_TOTAL.REQ_NO
+		                JOIN SUBJECT SUB_S_TOTAL ON SUB_LR_TOTAL.SUBJECT_CODE = SUB_S_TOTAL.SUBJECT_CODE
+		                WHERE SUB_LE_TOTAL.LEC_NO = LE_INNER.LEC_NO
+		                  AND SUB_LE_TOTAL.USER_NO = LE_INNER.USER_NO
+		                GROUP BY SUB_S_TOTAL.CREDIT
+		            ) * 0.10
+		        , 0) AS CALCULATED_FINAL_GRADE
+		    FROM LECTURE_ENR LE_INNER
+		    LEFT JOIN GRADE G_INNER ON LE_INNER.LEC_NO = G_INNER.LEC_NO AND LE_INNER.USER_NO = G_INNER.USER_NO
+		    WHERE LE_INNER.LEC_NO = #{lecNo} AND LE_INNER.USER_NO = #{userNo}
+		) CALC_SCORES ON LE.LEC_NO = CALC_SCORES.LEC_NO AND LE.USER_NO = CALC_SCORES.USER_NO
+		WHERE LE.LEC_NO = #{lecNo}  AND LE.USER_NO = #{userNo}
+    </select>
+
+    <select id="selStuGrd" resultMap="grdMap">
+        SELECT
+            LE.ENROLL_NO,
+            U.USER_NO,
+            U.USER_NAME,
+            D.DEPARTMENT_NAME,
+            G.GRADE_NO,
+            G.MIDTERM_SCORE,
+            G.FINAL_SCORE,
+            G.ASSIGNMENT_SCORE,
+            G.ATTENDANCE_SCORE,
+            G.FINAL_GRADE,
+            G.GRADE_DATE,
+            L.LEC_NO,
+            S.SUBJECT_NAME
+        FROM LECTURE_ENR LE
+	        JOIN TB_USER U ON LE.USER_NO = U.USER_NO
+            JOIN STUDENT ST ON U.USER_NO = ST.USER_NO
+	        JOIN DEPARTMENT D ON ST.DEPARTMENT_NO = D.DEPARTMENT_NO
+	        LEFT JOIN GRADE G ON LE.LEC_NO = G.LEC_NO AND LE.USER_NO = G.USER_NO
+            JOIN LECTURE L ON LE.LEC_NO = L.LEC_NO
+	        JOIN LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO
+	        JOIN SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE
+        WHERE L.LEC_NO = #{lecNo}
+        ORDER BY U.USER_NAME ASC
+    </select>
+
+    <select id="calAttScr" resultType="java.lang.Integer">
+        SELECT
+            ROUND(
+                (
+                    (
+                        (S.CREDIT * 15)
+                        -
+                        (
+                            COUNT(CASE A.ATTEND_STATUS WHEN '지각' THEN 1 END)
+                            + S.CREDIT * COUNT(CASE A.ATTEND_STATUS WHEN '결석' THEN 1 END)
+                        )
+                    )
+                    / (S.CREDIT * 15.0)
+                ) * 100
+            , 0) AS attendanceScore
+        FROM ATTENDANCE A
+        JOIN LECTURE_ENR LE ON A.ENROLL_NO = LE.ENROLL_NO
+        JOIN LECTURE L ON LE.LEC_NO = L.LEC_NO
+        JOIN LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO
+        JOIN SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE
+        WHERE LE.LEC_NO = #{lecNo}
+            AND LE.USER_NO = #{userNo}
+        GROUP BY S.CREDIT
+    </select>
+
+    <select id="getAssSubScr" resultType="java.lang.Integer">
+        SELECT NVL(SUM(SUBMIT_SCORE), 0)
+        FROM ASSIGN_SUBMISSION
+        WHERE ASSIGN_NO = #{assignNo} AND STUDENT_NO = #{userNo}
+    </select>
+
+    <select id="getAssignNosByLecNo" resultType="java.lang.String">
+        SELECT ASSIGN_NO
+        FROM ASSIGNMENT
+        WHERE LEC_NO = #{lecNo}
+    </select>
+
+    <select id="selStuScr" resultMap="grdMap">
+        SELECT
+            G.GRADE_NO,
+            LE.ENROLL_NO,
+            G.MIDTERM_SCORE,
+            G.FINAL_SCORE,
+            G.ASSIGNMENT_SCORE,
+            G.ATTENDANCE_SCORE,
+            G.FINAL_GRADE,
+            G.GRADE_DATE,
+            U.USER_NO,
+            U.USER_NAME,
+            D.DEPARTMENT_NAME,
+            L.LEC_NO,
+            S.SUBJECT_NAME
+        FROM GRADE G
+        JOIN LECTURE_ENR LE ON G.LEC_NO = LE.LEC_NO AND G.USER_NO = LE.USER_NO
+        JOIN TB_USER U ON LE.USER_NO = U.USER_NO
+        JOIN STUDENT ST ON U.USER_NO = ST.USER_NO
+        JOIN DEPARTMENT D ON ST.DEPARTMENT_NO = D.DEPARTMENT_NO
+        JOIN LECTURE L ON LE.LEC_NO = L.LEC_NO
+        JOIN LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO
+        JOIN SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE
+        WHERE LE.ENROLL_NO = #{enrNo} 
+    </select>
+
+    <update id="updAllScores" parameterType="kr.or.ddit.pfcp.common.vo.GradeVO">
+        UPDATE GRADE
+        SET
+            MIDTERM_SCORE = #{midtermScore},
+            FINAL_SCORE = #{finalScore},   
+            ATTENDANCE_SCORE = #{attendanceScore}
+        WHERE LEC_NO = #{lecNo} AND USER_NO = #{userNo}
+    </update>
+
+    <update id="updFinGradeAndAlpha" parameterType="map">
+        UPDATE GRADE
+        SET
+            FINAL_GRADE = #{finalGrade},
+            FINAL_GRADE_ALPHA = #{finalGradeAlpha},
+            GRADE_DATE = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+        WHERE LEC_NO = #{lecNo} AND USER_NO = #{userNo}
+    </update>
+
+    <update id="updLecEnrGradeAlpha" parameterType="map">
+        UPDATE LECTURE_ENR
+        SET
+            GRADE = #{finalGradeAlpha}
+        WHERE LEC_NO = #{lecNo} AND USER_NO = #{userNo}
+    </update>
+
+    <update id="updMidScr">
+        UPDATE GRADE
+        SET MIDTERM_SCORE = #{midtermScore} WHERE LEC_NO = #{lecNo} AND USER_NO = #{userNo}
+    </update>
+
+    <update id="updFinScr">
+        UPDATE GRADE
+        SET FINAL_SCORE = #{finalScore}
+        WHERE LEC_NO = #{lecNo} AND USER_NO = #{userNo}
+    </update>
+
+    <update id="updAssScr">
+        UPDATE GRADE
+        SET ASSIGNMENT_SCORE = #{assignmentScore}
+        WHERE LEC_NO = #{lecNo} AND USER_NO = #{userNo}
+    </update>
+
+    <update id="updAttScr">
+        UPDATE GRADE
+        SET ATTENDANCE_SCORE = #{attendanceScore}
+        WHERE LEC_NO = #{lecNo} AND USER_NO = #{userNo}
+    </update>
+
+    <update id="updFinGrDt">
+        UPDATE GRADE
+        SET
+            FINAL_GRADE = #{finalGrade},
+            GRADE_DATE = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+        WHERE LEC_NO = #{lecNo} AND USER_NO = #{userNo}
+    </update>
+
+    <insert id="insGrd">
+        INSERT INTO GRADE (GRADE_NO, LEC_NO, USER_NO, MIDTERM_SCORE, FINAL_SCORE, ASSIGNMENT_SCORE, ATTENDANCE_SCORE, FINAL_GRADE, GRADE_DATE)
+        VALUES (
+            'GRD' || TO_CHAR(SYSDATE, 'YYYYMMDD') || LPAD(GRADE_SEQ.NEXTVAL, 4, '0'),
+            #{lecNo},
+            #{userNo},
+            #{midtermScore},
+            #{finalScore},
+            #{assignmentScore},
+            #{attendanceScore},
+            #{finalGrade},
+            TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+        )
+    </insert>
+
+</mapper>

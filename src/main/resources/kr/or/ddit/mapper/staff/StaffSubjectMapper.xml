@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.subject.mapper.StaffSubjectMapper">
+	<select id="selectLectureReqList">
+		SELECT A.REQ_NO
+	           , A.SUBJECT_CODE
+	           , B.SUBJECT_NAME
+	           , A.USER_NO
+	           , C.USER_NAME
+	           , A.PRE_DAY
+	           , A.PRE_TIME
+	           , A.PRE_CLASSRM
+	           , A.STATUS
+	           , A.REJ_REASON
+	           , A.REQ_DATE
+	           , A.MAX_CAPACITY
+	           , A.FILE_REF_NO
+	           , A.LEC_NAME
+	           , A.LEC_CATEGORY
+	           , D.LR_NO
+	      FROM LECTURE_REQ A
+	INNER JOIN SUBJECT B ON A.SUBJECT_CODE=B.SUBJECT_CODE
+	INNER JOIN TB_USER C ON A.USER_NO=C.USER_NO
+	INNER JOIN LECTURE_ROOM D ON A.PRE_CLASSRM=D.LR_NAME
+	     WHERE STATUS='대기'
+	</select>
+	
+	<select id="selectLectureReqDetail">
+		SELECT A.REQ_NO
+	           , A.SUBJECT_CODE
+	           , B.SUBJECT_NAME
+	           , A.USER_NO
+	           , C.USER_NAME
+	           , A.PRE_DAY
+	           , A.PRE_TIME
+	           , A.PRE_CLASSRM
+	           , A.STATUS
+	           , A.REJ_REASON
+	           , A.REQ_DATE
+	           , A.MAX_CAPACITY
+	           , A.FILE_REF_NO
+	           , A.LEC_NAME
+	           , A.LEC_CATEGORY
+	           , D.LR_NO
+	      FROM LECTURE_REQ A
+	INNER JOIN SUBJECT B ON A.SUBJECT_CODE=B.SUBJECT_CODE
+	INNER JOIN TB_USER C ON A.USER_NO=C.USER_NO
+	INNER JOIN LECTURE_ROOM D ON A.PRE_CLASSRM=D.LR_NAME
+	     WHERE A.REQ_NO=#{reqNo}
+	</select>
+	
+	<update id="updateSubjectAccept">
+		UPDATE LECTURE_REQ
+		   SET STATUS='승인'
+		 WHERE REQ_NO=#{reqNo}
+	</update>
+	
+	<insert id="insertAcceptLecture">
+		INSERT INTO LECTURE (
+			LEC_NO
+			, REQ_NO
+			, CURRENT_ENROLLMENT
+			, LEC_STATUS
+			, LR_NO
+			, USER_NO
+		) VALUES (
+			'LEC' || LPAD(SEQ_LEC_NO.NEXTVAL, 3, '0')
+			, #{reqNo}
+			, 0
+			, 'OPEN'
+			, #{lrNo}
+			, #{userNo}
+		)
+	</insert>
+	
+	<update id="returnLectureReq">
+		UPDATE LECTURE_REQ
+		   SET STATUS='반려',
+		       REJ_REASON=#{rejReason}
+		 WHERE REQ_NO=#{reqNo}
+	</update>
+</mapper>

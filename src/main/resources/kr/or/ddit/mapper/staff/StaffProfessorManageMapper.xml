@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * == 개정이력(Modification Information) ==
+ * 수정일	수정자	수정내용
+ * ========================================
+ * 250701	서경덕	최초 생성
+ * 250702	이성화	상속 구조로 변경 및 오류 수정
+-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.professormanage.mapper.StaffProfessorManageMapper">
+
+    <!-- 상속 구조를 위한 ResultMap (StudentVO와 동일한 패턴) -->
+    <resultMap id="professorMap" type="ProfessorVO">
+        <!-- UserVO 필드들 (상속받은 필드들) -->
+        <id property="userNo" column="USER_NO"/>
+        <result property="rnum" column="RNUM"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="userEmail" column="USER_EMAIL"/>
+        <result property="userTel" column="USER_TEL"/>
+        <result property="userAdd1" column="USER_ADD1"/>
+        <result property="userAdd2" column="USER_ADD2"/>
+        <result property="userRegno1" column="USER_REGNO1"/>
+        <result property="userRegno2" column="USER_REGNO2"/>
+        <result property="gender" column="GENDER"/>
+        <result property="userZip" column="USER_ZIP"/>
+        <result property="bankCd" column="BANK_CD"/>
+        <result property="userBankno" column="USER_BANKNO"/>
+        <result property="userRole" column="USER_ROLE"/>
+        
+        <!-- ProfessorVO 전용 필드들 -->
+        <result property="proPosition" column="PRO_POSITION"/>
+        <result property="departmentNo" column="DEPARTMENT_NO"/>
+        <result property="proHiredate" column="PRO_HIREDATE"/>
+        <result property="proRdate" column="PRO_RDATE"/>
+        <result property="proStatus" column="PRO_STATUS"/>
+
+        <!-- Department Association -->
+        <association property="department" javaType="DepartmentVO">
+            <id property="departmentNo" column="DEPARTMENT_NO"/>
+            <result property="departmentName" column="DEPARTMENT_NAME"/>
+            <result property="departmentTuition" column="DEPARTMENT_TUITION"/>
+            <result property="dgrNo" column="DGR_NO"/>
+            <result property="collegeNo" column="COLLEGE_NO"/>
+            <result property="departmentDesc" column="DEPARTMENT_DESC"/>
+        </association>
+        
+        <association property="type" javaType="TypeVO">
+        	<id property="typeCode" column="TYPE_CODE"/>
+        	<result property="typeName" column="TYPE_NAME"/>
+        	<result property="isActive" column="IS_ACTIVE"/>
+        	<result property="typeGroup" column="TYPE_GROUP"/>
+        </association>
+    </resultMap>
+    
+    <resultMap id="typeMap" type="TypeVO">
+	    <id property="typeCode" column="TYPE_CODE"/>
+	    <result property="typeName" column="TYPE_NAME"/>
+	    <result property="isActive" column="IS_ACTIVE"/>
+	    <result property="typeGroup" column="TYPE_GROUP"/>
+	</resultMap>
+
+    <!-- 교수 목록 조회 -->
+    <select id="selectProfessorList" resultMap="professorMap">
+        SELECT ROW_NUMBER() OVER (ORDER BY PROF.USER_NO) AS RNUM,
+               PROF.USER_NO,
+               U.USER_NAME,
+               PROF.PRO_POSITION, 
+               PROF.DEPARTMENT_NO,
+               D.DEPARTMENT_NAME, 
+               PROF.PRO_HIREDATE, 
+               PROF.PRO_RDATE,
+               PROF.PRO_STATUS,
+               U.USER_EMAIL,
+               U.USER_TEL,
+               U.USER_ROLE,
+               T.TYPE_CODE,
+		       T.TYPE_NAME,
+		       T.IS_ACTIVE,
+		       T.TYPE_GROUP
+        FROM PROFESSOR PROF
+        JOIN TB_USER U ON PROF.USER_NO = U.USER_NO
+        JOIN DEPARTMENT D ON PROF.DEPARTMENT_NO = D.DEPARTMENT_NO
+        LEFT JOIN TYPE T ON U.BANK_CD = T.TYPE_CODE AND T.TYPE_GROUP = 'BANK'
+        ORDER BY PROF.PRO_HIREDATE DESC
+    </select>
+
+    <!-- 특정 교수 조회 -->
+    <select id="selectProfessor" resultMap="professorMap" parameterType="String">
+        SELECT PROF.USER_NO, 
+               U.USER_NAME, 
+               PROF.PRO_POSITION, 
+               PROF.DEPARTMENT_NO,
+               D.DEPARTMENT_NAME, 
+               PROF.PRO_HIREDATE, 
+               PROF.PRO_RDATE,
+               PROF.PRO_STATUS,
+               U.GENDER, 
+               U.USER_REGNO1, 
+               U.USER_REGNO2, 
+               U.USER_TEL, 
+               U.USER_ZIP,
+               U.USER_ADD1,
+               U.USER_ADD2,
+               U.USER_EMAIL, 
+               U.BANK_CD, 
+               U.USER_ROLE, 
+               U.USER_BANKNO,
+               T.TYPE_CODE,
+		       T.TYPE_NAME,
+		       T.IS_ACTIVE,
+		       T.TYPE_GROUP
+        FROM PROFESSOR PROF
+        JOIN TB_USER U ON PROF.USER_NO = U.USER_NO
+        JOIN DEPARTMENT D ON PROF.DEPARTMENT_NO = D.DEPARTMENT_NO
+        LEFT JOIN TYPE T ON U.BANK_CD = T.TYPE_CODE AND T.TYPE_GROUP = 'BANK'
+        WHERE PROF.USER_NO = #{userNo}
+    </select>
+
+    <!-- 교수 등록 - 통합 INSERT -->
+    <insert id="insertProfessor" parameterType="ProfessorVO">
+        INSERT ALL
+            INTO TB_USER (
+                USER_NO, USER_NAME, USER_PASS, GENDER, USER_REGNO1, USER_REGNO2,
+                USER_TEL, USER_ZIP, USER_ADD1, USER_ADD2, USER_EMAIL, 
+                BANK_CD, USER_BANKNO
+            )
+            VALUES (
+                'PR' || TO_CHAR(SYSDATE, 'YYYY') || TO_CHAR(SEQ_USER_NO.NEXTVAL, 'FM0000'), #{userName}, #{userPass}, #{gender}, #{userRegno1}, #{userRegno2},
+                #{userTel}, #{userZip}, #{userAdd1}, #{userAdd2}, #{userEmail},
+                #{bankCd}, #{userBankno}
+            )
+            INTO PROFESSOR (
+                USER_NO, PRO_POSITION, DEPARTMENT_NO, PRO_HIREDATE, PRO_RDATE, PRO_STATUS
+            )
+            VALUES (
+                'PR' || TO_CHAR(SYSDATE, 'YYYY') || TO_CHAR(SEQ_USER_NO.NEXTVAL, 'FM0000'), #{proPosition}, #{departmentNo}, TO_CHAR(SYSDATE, 'YYYY-MM-DD'), '-', '재직'
+            )
+        SELECT * FROM DUAL
+    </insert>
+
+    <!-- 교수 정보 수정 -->
+    <update id="updateProfessor" parameterType="ProfessorVO">
+        UPDATE TB_USER SET
+            USER_NAME = #{userName},
+            USER_TEL = #{userTel},
+            USER_ZIP = #{userZip},
+            USER_ADD1 = #{userAdd1},
+            USER_ADD2 = #{userAdd2},
+            USER_EMAIL = #{userEmail},
+            BANK_CD = #{bankCd},
+            USER_BANKNO = #{userBankno}
+        WHERE USER_NO = #{userNo}
+    </update>
+    
+    <update id="updateUser" parameterType="UserVO">
+    	UPDATE PROFESSOR 
+    	   SET PRO_POSITION = #{proPosition},
+			   DEPARTMENT_NO = #{departmentNo},
+			   PRO_STATUS = #{proStatus}
+         WHERE USER_NO = #{userNo}
+    </update>
+
+    <!-- 교수 퇴직 처리 (논리적 삭제) -->
+    <update id="deleteProfessor" parameterType="String">
+        UPDATE PROFESSOR
+        SET PRO_RDATE = TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+            PRO_STATUS = '퇴직'
+        WHERE USER_NO = #{userNo}
+    </update>
+
+	<select id="selectDepartmentList" resultMap="professorMap">
+		SELECT DEPARTMENT_NO
+	           , DEPARTMENT_NAME
+	           , DEPARTMENT_TUITION
+	           , DGR_NO, COLLEGE_NO
+	           , DEPARTMENT_DESC
+	      FROM DEPARTMENT
+	</select>
+	
+	<select id="selectBankCodeList" resultMap="typeMap">
+		SELECT TYPE_CODE
+		       , TYPE_NAME
+		       , IS_ACTIVE
+		       , TYPE_GROUP
+		  FROM TYPE
+		 WHERE TYPE_GROUP='BANK'
+	</select>
+	
+	<select id="selectGenerateNewUserNo">
+		SELECT 'PR' || TO_CHAR(SYSDATE, 'YYYY') || LPAD(SEQ_USER_NO.NEXTVAL, 4, '0') AS USER_NO
+    	  FROM DUAL
+	</select>
+</mapper>

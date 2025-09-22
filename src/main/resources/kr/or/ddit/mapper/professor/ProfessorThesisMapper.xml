@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.professor.thesis.mapper.ProfessorThesisMapper">
+
+	<resultMap id ="PropessorThesisMap" type="ThesisVO">
+		<id property="thesisNo" column="THESIS_NO" />
+		
+		<result property="thesisTitle" column="THESIS_TITLE" />
+		<result property="submitDate" column="SUBMIT_DATE" />
+		<result property="userNo" column="USER_NO" />
+		<result property="fileRefNo" column="FILE_REF_NO" />
+		<result property="status" column="STATUS" />
+		<result property="rejReason" column="REJ_REASON" />
+	</resultMap>
+
+
+	<select id="selectThesisList" resultType="kr.or.ddit.pfcp.common.vo.ThesisVO">
+		SELECT ROW_NUMBER() OVER(ORDER BY T.THESIS_NO) AS RNUM
+			 , T.THESIS_NO
+		     , T.THESIS_TITLE
+		     , T.SUBMIT_DATE
+		     , U.USER_NAME 
+		     , CASE
+		         WHEN T.FILE_REF_NO IS NULL THEN 'N'
+		         ELSE 'Y'
+		       END AS FILE_STATUS
+		      ,T.STATUS
+		      ,T.REJ_REASON
+		  FROM THESIS T
+		  JOIN TB_USER U ON T.USER_NO = U.USER_NO
+		  LEFT JOIN FILE_REF F ON T.FILE_REF_NO = F.FILE_REF_NO
+		  ORDER BY T.THESIS_NO DESC
+		  
+	</select>
+	
+	<select id="selectTotalThesisCnt">
+		SELECT COUNT(*)
+			FROM THESIS
+	</select>
+	
+	<select id="selectThesisDetail" resultMap="PropessorThesisMap" parameterType="String">
+		SELECT
+		    T.THESIS_NO,
+		    T.THESIS_TITLE,
+		    U.USER_NAME,
+		    U.USER_NO,
+		    T.FILE_REF_NO,
+		    T.REJ_REASON,
+		    T.SUBMIT_DATE,
+		    T.STATUS
+		FROM
+		    THESIS T
+		JOIN
+		    TB_USER U ON T.USER_NO = U.USER_NO
+		WHERE
+		    T.THESIS_NO = #{thesisNo}
+	</select>
+	
+	<insert id="insertThesis">
+		INSERT INTO THESIS(
+			THESIS_NO
+			,THESIS_TITLE
+			,SUBMIT_DATE
+			,USER_NO
+			,FILE_REF_NO
+			,STATUS
+		) VALUES (
+			'THS' || LPAD(THESIS_NO_SEQ.NEXTVAL, 3, '0')
+			,#{thesisTitle}
+			,TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+			,#{userNo}
+			,#{fileRefNo}
+			,'대기'
+		)
+		
+	</insert>
+	
+	<update id="updateThesis" parameterType="ThesisVO">
+	    UPDATE THESIS
+	    SET
+	        THESIS_TITLE = #{thesisTitle}
+	        <if test="fileRefNo != null and fileRefNo != ''">
+	            , FILE_REF_NO = #{fileRefNo} 
+	        </if>
+	    WHERE
+	        THESIS_NO = #{thesisNo}
+	</update>
+	
+	<update id="deleteThesis">
+		UPDATE THESIS
+			SET
+				STATUS = '취소'
+			WHERE
+				THESIS_NO = #{thesisNo}
+	</update>
+
+	 <select id="selectThesisListByPaging" resultMap="PropessorThesisMap" parameterType="map">
+        SELECT
+            T.THESIS_NO,
+            T.USER_NO,
+            U.USER_NAME,
+            T.THESIS_TITLE,
+            T.SUBMIT_DATE,
+            T.FILE_REF_NO,
+            T.STATUS,
+            AF.ATCH_ORIGIN_NAME AS FILE_NAME
+        FROM
+            THESIS T
+        JOIN
+            TB_USER U ON T.USER_NO = U.USER_NO
+        LEFT JOIN
+            FILE_REF F ON T.FILE_REF_NO = F.FILE_REF_NO
+        LEFT JOIN
+            ATCH_FILE AF ON F.ATCH_ID = AF.ATCH_ID
+        WHERE
+            T.USER_NO = #{userNo}
+        ORDER BY
+            T.THESIS_NO DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+    </select>
+
+    <select id="selectTotalThesisCntByPaging" resultType="int" parameterType="String">
+        SELECT
+            COUNT(*)
+        FROM
+            THESIS
+        WHERE
+            USER_NO = #{userNo}
+    </select>
+
+    <select id="selectThesisListWithPaging" resultMap="PropessorThesisMap" parameterType="map">
+        SELECT
+            T.THESIS_NO,
+            T.USER_NO,
+            U.USER_NAME,
+            T.SUBMIT_DATE,
+            T.THESIS_DATE,
+            T.FILE_REF_NO,
+            T.STATUS,
+            AF.ATCH_ORIGIN_NAME AS FILE_NAME
+        FROM
+            THESIS T
+        JOIN
+            TB_USER U ON T.USER_NO = U.USER_NO
+        LEFT JOIN
+            FILE_REF F ON T.FILE_REF_NO = F.FILE_REF_NO
+        LEFT JOIN
+            ATCH_FILE AF ON F.ATCH_ID = AF.ATCH_ID
+        ORDER BY
+            T.THESIS_NO DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+    </select>
+
+    <update id="updateThesisFileRefNo" parameterType="map">
+        UPDATE THESIS
+        SET FILE_REF_NO = #{fileRefNo}
+        WHERE THESIS_NO = #{thesisNo}
+    </update>
+
+</mapper>

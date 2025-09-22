@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.reservationTimestamp.facility.mapper.FacilityRTMapper">
+
+	<select id="selectFacilityRT" parameterType="String">
+		SELECT
+		    RESERVATION_ID,
+		    RESERVATION_DAY,
+		    START_HOUR,
+		    RESERVATION_TYPE,
+		    USER_NO,
+		    FACILITY_NO
+		FROM
+		    RESERVATION_TIMESTAMP
+		WHERE FACILITY_NO = #{facilityNo}
+	</select>
+
+	<insert id="insertFacilityRT" parameterType="kr.or.ddit.pfcp.common.vo.ReservationTimestampVO">
+	     INSERT INTO RESERVATION_TIMESTAMP (
+	     		RESERVATION_ID, 
+	     		RESERVATION_DAY, 
+	     		START_HOUR, 
+	     		RESERVATION_TYPE, 
+	     		FACILITY_NO)
+		VALUES (
+		    #{reservationDay} || #{startHour} || '-' || #{facilityNo},
+		    #{reservationDay},
+		    #{startHour},
+		    'FACILITY',
+		    #{facilityNo}
+		)
+	</insert>
+
+	<delete id="deleteFacilityRT" parameterType="String">
+	   DELETE FROM RESERVATION_TIMESTAMP
+		WHERE Facility_NO = #{failictyNo}
+	</delete>
+
+
+
+
+
+
+
+
+</mapper>

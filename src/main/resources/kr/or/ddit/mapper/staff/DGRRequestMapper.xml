@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.college.mapper.DGRRequestMapper">
+	<resultMap id="dgrReqMap" type="kr.or.ddit.pfcp.common.vo.DGRRequestVO">
+		<id property="dgrNo" column="DGR_NO" />
+		<result property="dgrGrade" column="DGR_GRADE" />
+		<result property="dgrMc" column="DGR_MC" />
+		<result property="dgrLac" column="DGR_LAC" />
+		<result property="dgrFcc" column="DGR_FCC" />
+		<result property="dgrDate" column="DGR_DATE" />
+		<result property="dgrVolunteerHour" column="DGR_VOLUNTEER_HOUR" />
+	</resultMap>
+	
+	<select id="selectDGRRequest" resultType="DGRRequestVO">
+		SELECT
+            DR.DGR_NO,
+            DR.DGR_GRADE,
+            DR.DGR_MC,
+            DR.DGR_LAC,
+            DR.DGR_FCC,
+            DR.DGR_DATE,
+            DR.DGR_VOLUNTEER_HOUR
+        FROM
+            DEPARTMENT D         
+        JOIN
+            DGR_REQ DR ON D.DGR_NO = DR.DGR_NO 
+        WHERE
+            D.DEPARTMENT_NO = #{departmentNo}
+	</select>
+	
+	<!-- 학과 등록 할때 쓰는 키 값 -->
+	<insert id="insertDGRRequest" parameterType="kr.or.ddit.pfcp.common.vo.DGRRequestVO">
+        <selectKey keyProperty="dgrNo" resultType="string" order="BEFORE">
+            SELECT 'DG' || TO_CHAR(SYSDATE, 'YYYY') || LPAD(SEQ_DGR_REQ.NEXTVAL, 2, '0') FROM DUAL
+        </selectKey>
+
+        INSERT INTO DGR_REQ (
+            DGR_NO,
+            DGR_GRADE,
+            DGR_MC,
+            DGR_LAC,
+            DGR_FCC,
+            DGR_DATE,
+            DGR_VOLUNTEER_HOUR
+        ) VALUES (
+            #{dgrNo},
+            #{dgrGrade},
+            #{dgrMc},
+            #{dgrLac},
+            #{dgrFcc},
+            TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+            #{dgrVolunteerHour}
+        )
+    </insert>
+    
+    
+    
+    
+	
+</mapper>

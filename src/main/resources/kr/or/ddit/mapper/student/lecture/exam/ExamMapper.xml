@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.student.eclass.exam.mapper.ExamMapper">
+	<select id="selectExamList" parameterType="map">
+		SELECT A.EXAM_NO
+			   , A.LEC_NO
+			   , A.EXAM_NAME
+			   , A.EXAM_DATE
+			   , A.EXAM_TYPE
+			   , A.EXAM_LIMIT
+			   , A.FACILITY_NO
+			   , A.FILE_REF_NO
+			   , A.STATUS
+			   , B.USER_NO
+	      FROM EXAM A
+	INNER JOIN (
+	        SELECT DISTINCT LEC_NO, USER_NO
+	          FROM LECTURE_ENR
+	         WHERE USER_NO = #{userNo}) B ON A.LEC_NO = B.LEC_NO
+	     WHERE A.LEC_NO=#{lecNo}
+	</select>
+	
+	<select id="selectExamDetail">
+		SELECT A.EXAM_NO
+	           , A.LEC_NO
+	           , A.EXAM_NAME
+	           , A.EXAM_DATE
+	           , A.EXAM_TYPE
+	           , A.EXAM_LIMIT
+	           , A.FACILITY_NO
+	           , A.FILE_REF_NO
+	           , A.STATUS
+	           , D.ATCH_ID
+	           , D.ATCH_CONTENT
+	      FROM EXAM A
+	INNER JOIN QUESTION_ANSWER B ON A.EXAM_NO=B.EXAM_NO
+	INNER JOIN FILE_REF C ON A.FILE_REF_NO=C.FILE_REF_NO
+	INNER JOIN ATCH_FILE D ON C.ATCH_ID=D.ATCH_ID
+	     WHERE A.EXAM_NO=#{examNo}
+	</select>
+	
+	<select id="selectPdfContentByExamNo" parameterType="String" resultType="ExamVO">
+	    SELECT C.ATCH_CONTENT as atchContent
+	    FROM EXAM A
+	    INNER JOIN FILE_REF B ON A.FILE_REF_NO = B.FILE_REF_NO
+	    INNER JOIN ATCH_FILE C ON C.ATCH_ID = B.ATCH_ID
+	    WHERE A.EXAM_NO=#{examNo}
+	</select>
+	
+	<select id="selectExamNoByExamName" parameterType="String" resultType="String">
+	    SELECT EXAM_NO
+	      FROM EXAM
+	     WHERE EXAM_NAME=#{examName}
+	</select>
+	
+	<select id="selectQuestionCountByExamNo">
+		SELECT COUNT(QUESTION_SEQ)
+	      FROM QUESTION_ANSWER
+	     WHERE EXAM_NO=#{examNo}
+	</select>
+	
+	<select id="selectQuestionByExamNo">
+		SELECT QUESTION_SEQ
+			   , ANSWER
+			   , QUESTION_SCORE
+	      FROM QUESTION_ANSWER
+	     WHERE EXAM_NO=#{examNo}
+	</select>
+	
+	<select id="selectExamType" parameterType="String" resultType="String">
+	    SELECT EXAM_TYPE
+	      FROM EXAM
+	     WHERE EXAM_NO=#{examNo}
+	</select>
+	
+	<select id="selectLectureNoByExamNo" parameterType="String" resultType="String">	
+	    SELECT LEC_NO
+	      FROM EXAM
+	     WHERE EXAM_NO = #{examNo}
+	</select>
+</mapper>

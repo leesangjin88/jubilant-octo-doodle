@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.lectureEvaluation.mapper.StaffLectureEvaluationMapper">
+
+	<select id="selectAttendanceList">
+		SELECT
+			ROW_NUMBER() OVER (ORDER BY CRITERIA_NO) AS RNUM,
+		    CRITERIA_NO,
+		    CRITERIA_NAME,
+		    COLUMN_ALIAS,
+		    CRITERIA_DESC,
+		    CRITERIA_USE,
+		    USE_FOR,
+		    EVAL_NO
+		FROM
+		    EVAL_CRITERIA
+	</select>
+
+	<update id="updateCriteriaDescIfChanged" parameterType="map">
+	    UPDATE EVAL_CRITERIA
+	    SET CRITERIA_DESC = #{criteriaDesc}
+	    WHERE CRITERIA_NO = #{criteriaNo}
+	      AND NVL(CRITERIA_DESC, ' ') != NVL(#{criteriaDesc}, ' ')
+	</update>
+</mapper>

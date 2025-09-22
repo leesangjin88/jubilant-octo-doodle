@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.pfcp.professor.data.mapper.ProfessorLectureEvalDataMapper">
+	
+	<select id="selectLectureEvalDataList" resultType="kr.or.ddit.pfcp.common.vo.LectureEvalVO">
+		SELECT
+            LE.EVAL_NO AS evalNo,
+            LE.ENROLL_NO AS enrollNo,
+            LE.EVAL_DATE AS evalDate,
+            LE.OVERALL_SCORE AS overallScore,
+            SUB.SUBJECT_NAME AS subjectName,
+            P.USER_NO AS professorNo FROM
+            LECTURE_EVAL LE
+        JOIN
+            LECTURE_ENR LENR ON LE.ENROLL_NO = LENR.ENROLL_NO
+        JOIN
+            LECTURE L ON LENR.LEC_NO = L.LEC_NO
+        JOIN
+            LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO 
+        JOIN
+            SUBJECT SUB ON LR.SUBJECT_CODE = SUB.SUBJECT_CODE
+        JOIN
+            PROFESSOR P ON LR.USER_NO = P.USER_NO  ORDER BY
+            LE.EVAL_NO ASC
+	</select>
+	
+<!-- 	<select id="selectLectureEvalDataList" resultType="kr.or.ddit.pfcp.common.vo.LectureEvalVO">
+		SELECT
+            LE.EVAL_NO AS evalNo,
+            LE.ENROLL_NO AS enrollNo,
+            LE.EVAL_DATE AS evalDate,
+            LE.OVERALL_SCORE AS overallScore,
+            SUB.SUBJECT_NAME AS subjectName
+        FROM
+            LECTURE_EVAL LE
+        JOIN
+            LECTURE_ENR LENR ON LE.ENROLL_NO = LENR.ENROLL_NO
+        JOIN
+            LECTURE L ON LENR.LEC_NO = L.LEC_NO
+        JOIN
+            LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO 
+        JOIN
+            SUBJECT SUB ON LR.SUBJECT_CODE = SUB.SUBJECT_CODE
+        ORDER BY
+            LE.EVAL_NO ASC
+	</select> -->
+	
+	<select id="selectLectureEvalData" parameterType="String" resultType="kr.or.ddit.pfcp.common.vo.LectureEvalVO">
+		SELECT
+            LE.EVAL_NO AS evalNo,
+            LE.ENROLL_NO AS enrollNo,
+            LE.EVAL_DATE AS evalDate,
+            LE.OVERALL_SCORE AS overallScore,
+            SUB.SUBJECT_NAME AS subjectName,
+            P.USER_NO AS professorNo FROM
+            LECTURE_EVAL LE
+        JOIN
+            LECTURE_ENR LENR ON LE.ENROLL_NO = LENR.ENROLL_NO
+        JOIN
+            LECTURE L ON LENR.LEC_NO = L.LEC_NO
+        JOIN
+            LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO 
+        JOIN
+            SUBJECT SUB ON LR.SUBJECT_CODE = SUB.SUBJECT_CODE
+        JOIN
+            PROFESSOR P ON LR.USER_NO = P.USER_NO WHERE
+        	LR.USER_NO = #{userNo} ORDER BY
+            LE.EVAL_NO ASC
+	</select>
+	
+</mapper>
+
+

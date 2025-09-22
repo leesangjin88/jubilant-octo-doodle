@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.college.mapper.CurriculumMapper">
+
+	<select id="selectCurriculum" resultType="CurriculumVO">
+		<!-- 커리큘럼 상세조회 -->
+		SELECT
+			C.CUR_NO,
+			C.DEPARTMENT_NO,
+			C.SUBJECT_CODE,
+			C.REQ_CODE,
+			S.SUBJECT_NAME  <!-- 여기에 SUBJECT_NAME 추가 -->
+		FROM CURRICULUM C
+		JOIN SUBJECT S ON C.SUBJECT_CODE = S.SUBJECT_CODE <!-- SUBJECT 테이블과 JOIN -->
+		WHERE C.DEPARTMENT_NO = #{departmentNo}
+		ORDER BY C.CUR_NO
+	</select>
+
+	<insert id="insertCurriculum">
+		INSERT INTO CURRICULUM (
+			CUR_NO
+			,DEPARTMENT_NO
+			,SUBJECT_CODE
+			,REQ_CODE
+		) VALUES (
+			'CUR' || TO_CHAR(SYSDATE, 'YYYYMM') || LPAD(SEQ_CURRICULUM.NEXTVAL, 2, '0')
+			,#{departmentNo}
+			,#{subjectCode}
+			,#{reqCode}
+		)
+	</insert>
+
+	<select id="selectAllCurriculumList" resultType="CurriculumVO">
+		SELECT
+			CUR_NO
+			,DEPARTMENT_NO
+			,SUBJECT_CODE
+			,REQ_CODE
+		FROM
+			CURRICULUM
+		<!-- ORDER BY CUR_NO ASC -->
+	</select>
+
+	<!-- department 조회 -->
+	<!-- <select id="selectAllDepartmentList" resultType="DepartmentVO">
+		SELECT
+			DEPARTMENT_NO
+			,DEPARTMENT_NAME
+			,DEPARTMENT_TUITION
+			,COLLEGE_NO
+			,DEPARTMENT_DESC
+		FROM DEPARTMENT
+	</select> -->
+	
+	<!-- subject 조회 -->
+	<select id="selectAllSubjectList" resultType="kr.or.ddit.pfcp.common.vo.SubjectVO">
+		SELECT 
+			SUBJECT_CODE
+			, SUBJECT_NAME	   
+		FROM SUBJECT
+	</select>
+
+</mapper>

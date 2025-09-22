@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.student.state.mapper.StudentStateMapper">
+	<resultMap type="AcademicChangeRequestVO" id="academicChangeRequestMap" autoMapping="true">
+        <id property="requestNo" column="REQUEST_NO"/>
+        <result property="userNo" column="USER_NO"/>
+        <result property="typeCode" column="TYPE_CODE"/>
+        <result property="semesterNo" column="SEMESTER_NO"/>
+        <result property="reason" column="REASON"/>
+        <result property="requestDate" column="REQUEST_DATE"/>
+        <result property="status" column="STATUS"/>
+        <result property="requestThing" column="REQUEST_THING"/>
+
+        <association property="student" javaType="kr.or.ddit.pfcp.common.vo.StudentVO" autoMapping="true">
+            <result property="studentNo" column="USER_NO"/>
+            <result property="departmentNo" column="DEPARTMENT_NO"/>
+
+            <association property="department" javaType="kr.or.ddit.pfcp.common.vo.DepartmentVO" autoMapping="true">
+                <result property="departmentNo" column="DEPARTMENT_NO"/>
+                <result property="departmentName" column="DEPARTMENT_NAME"/>
+                <result property="departmentTuition" column="DEPARTMENT_TUITION"/>
+            </association>
+        </association>
+    </resultMap>
+    
+    <resultMap id="studentMap" type="kr.or.ddit.pfcp.common.vo.StudentVO">
+	    <id property="userNo" column="USER_NO"/>
+	    <result property="studentEdate" column="STUDENT_EDATE"/>
+	    <result property="studentGdate" column="STUDENT_GDATE"/>
+	    <result property="studentEmp" column="STUDENT_EMP"/>
+	    <result property="departmentNo" column="DEPARTMENT_NO"/>
+	    <result property="studentGrade" column="STUDENT_GRADE"/>
+	    <result property="subDepartmentNo" column="SUB_DEPARTMENT_NO"/>
+	    <result property="remainLeave" column="REMAIN_LEAVE"/>
+	    
+	    <association property="department" javaType="kr.or.ddit.pfcp.common.vo.DepartmentVO">
+	        <id property="departmentNo" column="DEPARTMENT_NO"/>
+	        <result property="departmentName" column="DEPARTMENT_NAME"/>
+	    </association>
+	</resultMap>
+    
+     <select id="selectStudentInfo" parameterType="string" resultMap="studentMap">
+		SELECT A.USER_NO
+               , A.STUDENT_EDATE
+               , A.STUDENT_GDATE
+               , A.STUDENT_EMP
+               , A.DEPARTMENT_NO
+               , B.DEPARTMENT_NAME
+               , A.STUDENT_GRADE
+               , A.SUB_DEPARTMENT_NO
+               , A.REMAIN_LEAVE
+          FROM STUDENT A
+    INNER JOIN DEPARTMENT B ON A.DEPARTMENT_NO=B.DEPARTMENT_NO
+         WHERE USER_NO = #{userNo}
+    </select>
+
+    <select id="selectAcademicChangeRequestMajorChange" resultMap="academicChangeRequestMap" parameterType="string">
+        SELECT A.REQUEST_NO, 
+               A.USER_NO, 
+               A.TYPE_CODE, 
+               A.SEMESTER_NO, 
+               A.REASON, 
+               A.REQUEST_DATE, 
+               A.STATUS,
+               A.REQUEST_THING,
+               S.USER_NO,
+               S.DEPARTMENT_NO,
+               D.DEPARTMENT_NAME,
+               D.DEPARTMENT_TUITION
+          FROM ACADEMIC_CHANGE_REQUEST A
+          JOIN STUDENT S ON A.USER_NO = S.USER_NO
+          JOIN DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO
+         WHERE A.TYPE_CODE = 'AC_MAJOR'
+           AND (STATUS='대기중' OR STATUS='처리완료')
+           AND A.USER_NO = #{userNo}
+    </select>
+
+	<select id="selectAcademicChangeRequestDouble">
+		SELECT REQUEST_NO, 
+		       USER_NO, 
+		       TYPE_CODE, 
+		       SEMESTER_NO, 
+		       REASON, 
+		       REQUEST_DATE, 
+		       STATUS
+		  FROM ACADEMIC_CHANGE_REQUEST
+		 WHERE TYPE_CODE='AC_DOUBLE'
+		   AND (STATUS='대기중' OR STATUS='처리완료')
+		   AND USER_NO=#{userNo}
+	</select>
+	
+	<select id="selectAcademicChangeRequestLeaveApply">
+		SELECT REQUEST_NO, 
+		       USER_NO, 
+		       TYPE_CODE, 
+		       SEMESTER_NO, 
+		       REASON, 
+		       REQUEST_DATE, 
+		       STATUS,
+		       REQUEST_THING
+		  FROM ACADEMIC_CHANGE_REQUEST
+		 WHERE TYPE_CODE='AC_SUSPEND'
+		   AND (STATUS='대기중' OR STATUS='처리완료')
+		   AND USER_NO=#{userNo}
+	</select>
+	
+	<select id="selectAcademicChangeRequestReturn">
+		SELECT REQUEST_NO, 
+		       USER_NO, 
+		       TYPE_CODE, 
+		       SEMESTER_NO, 
+		       REASON, 
+		       REQUEST_DATE, 
+		       STATUS,
+		       REQUEST_THING
+		  FROM ACADEMIC_CHANGE_REQUEST
+		 WHERE TYPE_CODE='AC_RETURN'
+		   AND (STATUS='대기중' OR STATUS='처리완료')
+		   AND USER_NO=#{userNo}
+	</select>
+	
+	<select id="selectAcademicChangeRequestGraduationSuspension">
+		SELECT REQUEST_NO, 
+		       USER_NO, 
+		       TYPE_CODE, 
+		       SEMESTER_NO, 
+		       REASON, 
+		       REQUEST_DATE, 
+		       STATUS,
+		       REQUEST_THING
+		  FROM ACADEMIC_CHANGE_REQUEST
+		 WHERE TYPE_CODE='AC_GRADSUS'
+		   AND (STATUS='대기중' OR STATUS='처리완료')
+		   AND USER_NO=#{userNo}
+	</select>
+	
+	<select id="selectAcademicChangeRequestMajorChangeDetail" resultMap="academicChangeRequestMap">
+		SELECT A.REQUEST_NO, 
+               A.USER_NO, 
+               A.TYPE_CODE, 
+               A.SEMESTER_NO, 
+               A.REASON, 
+               A.REQUEST_DATE, 
+               A.STATUS,
+               A.REQUEST_THING,
+               S.USER_NO,
+               S.DEPARTMENT_NO,
+               D.DEPARTMENT_NAME,
+               D.DEPARTMENT_TUITION
+          FROM ACADEMIC_CHANGE_REQUEST A
+          JOIN STUDENT S ON A.USER_NO = S.USER_NO
+          JOIN DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO
+         WHERE A.TYPE_CODE = 'AC_MAJOR'
+           AND A.REQUEST_NO = #{requestNo}
+	</select>
+	
+	<select id="selectAcademicChangeRequestDoubleDetail" resultMap="academicChangeRequestMap">
+		SELECT A.REQUEST_NO, 
+               A.USER_NO, 
+               A.TYPE_CODE, 
+               A.SEMESTER_NO, 
+               A.REASON, 
+               A.REQUEST_DATE, 
+               A.STATUS,
+               A.REQUEST_THING,
+               S.USER_NO,
+               S.DEPARTMENT_NO,
+               D.DEPARTMENT_NAME,
+               D.DEPARTMENT_TUITION
+          FROM ACADEMIC_CHANGE_REQUEST A
+          JOIN STUDENT S ON A.USER_NO = S.USER_NO
+          JOIN DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO
+         WHERE A.TYPE_CODE = 'AC_DOUBLE'
+           AND A.REQUEST_NO = #{requestNo}
+	</select>
+
+	<select id="selectAcademicChangeRequestLeaveApplyDetail" resultMap="academicChangeRequestMap">
+		SELECT A.REQUEST_NO, 
+               A.USER_NO, 
+               A.TYPE_CODE, 
+               A.SEMESTER_NO, 
+               A.REASON, 
+               A.REQUEST_DATE, 
+               A.STATUS,
+               A.REQUEST_THING,
+               S.USER_NO,
+               S.DEPARTMENT_NO,
+               D.DEPARTMENT_NAME,
+               D.DEPARTMENT_TUITION
+          FROM ACADEMIC_CHANGE_REQUEST A
+          JOIN STUDENT S ON A.USER_NO = S.USER_NO
+          JOIN DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO
+         WHERE A.TYPE_CODE = 'AC_SUSPEND'
+           AND A.REQUEST_NO = #{requestNo}
+	</select>
+	
+	<select id="selectAcademicChangeRequestReturnDetail" resultMap="academicChangeRequestMap">
+		SELECT A.REQUEST_NO, 
+               A.USER_NO, 
+               A.TYPE_CODE, 
+               A.SEMESTER_NO, 
+               A.REASON, 
+               A.REQUEST_DATE, 
+               A.STATUS,
+               A.REQUEST_THING,
+               S.USER_NO,
+               S.DEPARTMENT_NO,
+               D.DEPARTMENT_NAME,
+               D.DEPARTMENT_TUITION
+          FROM ACADEMIC_CHANGE_REQUEST A
+          JOIN STUDENT S ON A.USER_NO = S.USER_NO
+          JOIN DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO
+         WHERE A.TYPE_CODE = 'AC_RETURN'
+           AND A.REQUEST_NO = #{requestNo}
+	</select>
+	
+	<select id="selectAcademicChangeRequestGraduationSuspensionDetail">
+		SELECT A.REQUEST_NO, 
+               A.USER_NO, 
+               A.TYPE_CODE, 
+               A.SEMESTER_NO, 
+               A.REASON, 
+               A.REQUEST_DATE, 
+               A.STATUS,
+               A.REQUEST_THING,
+               S.USER_NO,
+               S.DEPARTMENT_NO,
+               D.DEPARTMENT_NAME,
+               D.DEPARTMENT_TUITION
+          FROM ACADEMIC_CHANGE_REQUEST A
+          JOIN STUDENT S ON A.USER_NO = S.USER_NO
+          JOIN DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO
+         WHERE A.TYPE_CODE = 'AC_GRADSUS'
+           AND A.REQUEST_NO = #{requestNo}
+	</select>
+	
+	<insert id="insertAcademicChangeRequestMajorChange">
+		INSERT INTO ACADEMIC_CHANGE_REQUEST (
+			REQUEST_NO, 
+			USER_NO, 
+			TYPE_CODE, 
+			SEMESTER_NO, 
+			REASON, 
+			REQUEST_DATE, 
+			STATUS,
+			REQUEST_THING
+		)
+		VALUES (
+			'REQ' || LPAD(ACADEMIC_CHANGE_REQ_SEQ.NEXTVAL, 3, '0'),
+			#{userNo},
+			'AC_MAJOR',
+			#{semesterNo},
+			#{reason},
+			TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+			'대기중',
+			#{requestThing}
+		)
+	</insert>
+	
+	<insert id="insertAcademicChangeRequestDouble">
+		INSERT INTO ACADEMIC_CHANGE_REQUEST (
+			REQUEST_NO, 
+			USER_NO, 
+			TYPE_CODE, 
+			REASON, 
+			REQUEST_DATE, 
+			STATUS,
+			REQUEST_THING
+		)
+		VALUES (
+			'REQ' || LPAD(ACADEMIC_CHANGE_REQ_SEQ.NEXTVAL, 3, '0'),
+			#{userNo},
+			'AC_DOUBLE',
+			#{reason},
+			TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+			'대기중',
+			#{requestThing}
+		)
+	</insert>
+	
+	<insert id="insertAcademicChangeRequestLeaveApply">
+		INSERT INTO ACADEMIC_CHANGE_REQUEST (
+			REQUEST_NO, 
+			USER_NO, 
+			TYPE_CODE, 
+			SEMESTER_NO, 
+			REASON, 
+			REQUEST_DATE, 
+			STATUS,
+			REQUEST_THING
+		)
+		VALUES (
+			'REQ' || LPAD(ACADEMIC_CHANGE_REQ_SEQ.NEXTVAL, 3, '0'),
+			#{userNo},
+			'AC_SUSPEND',
+			#{semesterNo},
+			#{reason},
+			TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+			'대기중',
+			#{requestThing}
+		)
+	</insert>
+	
+	<insert id="insertAcademicChangeRequestReturn">
+		INSERT INTO ACADEMIC_CHANGE_REQUEST (
+			REQUEST_NO, 
+			USER_NO, 
+			TYPE_CODE, 
+			SEMESTER_NO, 
+			REASON, 
+			REQUEST_DATE, 
+			STATUS,
+			REQUEST_THING
+		)
+		VALUES (
+			'REQ' || LPAD(ACADEMIC_CHANGE_REQ_SEQ.NEXTVAL, 3, '0'),
+			#{userNo},
+			'AC_RETURN',
+			#{semesterNo},
+			#{reason},
+			TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+			'대기중',
+			#{requestThing}
+		)
+	</insert>
+	
+	<insert id="insertAcademicChangeRequestGraduationSuspension">
+		INSERT INTO ACADEMIC_CHANGE_REQUEST (
+			REQUEST_NO, 
+			USER_NO, 
+			TYPE_CODE, 
+			SEMESTER_NO, 
+			REASON, 
+			REQUEST_DATE, 
+			STATUS,
+			REQUEST_THING
+		)
+		VALUES (
+			'REQ' || LPAD(ACADEMIC_CHANGE_REQ_SEQ.NEXTVAL, 3, '0'),
+			#{userNo},
+			'AC_GRADSUS',
+			#{semesterNo},
+			#{reason},
+			TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+			'대기중',
+			#{requestThing}
+		)
+	</insert>
+	
+	<update id="updateAcademicChangeRequestMajorChange">
+		UPDATE ACADEMIC_CHANGE_REQUEST
+		   SET REASON=#{reason}
+		 WHERE REQUEST_NO=#{requestNo}
+	</update>
+	
+	<update id="deleteAcademicChangeRequestMajorChange">
+		UPDATE ACADEMIC_CHANGE_REQUEST
+		   SET STATUS='삭제'
+		 WHERE REQUEST_NO=#{requestNo}
+	</update>
+</mapper>

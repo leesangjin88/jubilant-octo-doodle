@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.pfcp.student.lecture.material.mapper.LectureMaterialMapper">
+	<resultMap id="lectureMaterialResultMap" type="LectureMaterialVO" autoMapping="true">
+		<id property="materialNo" column="MATERIAL_NO" />
+		
+		<association property="atchFile" javaType="kr.or.ddit.pfcp.common.vo.AtchFileVO">
+			<result property="atchId" column="ATCH_ID"/>
+			<result property="atchOriginName" column="ATCH_ORIGIN_NAME"/>
+		    <result property="atchMime" column="ATCH_MIME"/>
+		    <result property="atchSaveName" column="ATCH_SAVE_NAME"/>
+		    <result property="atchSize" column="ATCH_SIZE"/>
+		    <result property="atchDate" column="ATCH_DATE"/>
+		</association>
+	</resultMap>
+	
+	<insert id="insertLectureMaterial">
+		INSERT INTO LECTURE_MATERIAL(
+			MATERIAL_NO
+			,MATERIAL_TITLE
+			,MATERIAL_DESP
+			,UPLOAD_DATE
+			,DOWNLOAD_COUNT
+			,LEC_NO
+			,FILE_REF_NO
+			,PROFESSOR_NO
+			)VALUES(
+			SEQ_MATERIAL_NO.NEXTVAL
+			,#{materialTitle}
+			,#{materialDesp}
+			,TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+			,0
+			,#{lecNo}
+			,#{fileRefNo}
+			,#{professorNo}
+			)
+	</insert>
+	
+	<select id="existsLectureMaterial">
+		SELECT 
+	    CASE 
+	        WHEN EXISTS (
+	            SELECT 1 
+	            FROM LECTURE_MATERIAL 
+	            WHERE MATERIAL_NO = #{materialNo} 
+	              AND PROFESSOR_NO = #{professorNo}
+	        ) THEN 1 
+	        ELSE 0 
+	    END AS has_submitted
+	  FROM DUAL
+	</select>
+	
+	<update id="updateLectureMaterial">
+		UPDATE LECTURE_MATERIAL
+	  	   SET 
+	    	FILE_REF_NO = #{fileRefNo}
+	    	,UPLOAD_DATE = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+	    	,MATERIAL_TITLE = #{materialTitle}
+			 ,MATERIAL_DESP = #{materialDesp}
+	     WHERE LEC_NO = #{lecNo}
+	       AND PROFESSOR_NO = #{professorNo}
+	       AND MATERIAL_NO = #{materialNo}
+	</update>
+	
+	<select id="getLectureMaterialList" resultMap="lectureMaterialResultMap">
+		SELECT LM.MATERIAL_NO
+		       ,LM.MATERIAL_TITLE
+		       ,LM.MATERIAL_DESP
+		       ,LM.UPLOAD_DATE
+		       ,LM.DOWNLOAD_COUNT
+		       ,LM.LEC_NO
+		       ,LM.FILE_REF_NO
+		       ,LM.PROFESSOR_NO
+		       ,A.ATCH_ORIGIN_NAME
+		       ,A.ATCH_SIZE
+		  FROM LECTURE_MATERIAL LM
+		  LEFT JOIN FILE_REF F ON LM.FILE_REF_NO=F.FILE_REF_NO
+		  LEFT JOIN ATCH_FILE A ON F.ATCH_ID=A.ATCH_ID
+		 WHERE LEC_NO=#{lecNo}
+		   AND LM.DELETE_STATUS='N'
+	</select>
+	
+	<select id="getLectureMaterial" resultMap="lectureMaterialResultMap">
+		SELECT LM.MATERIAL_NO
+		       ,LM.MATERIAL_TITLE
+		       ,LM.MATERIAL_DESP
+		       ,LM.UPLOAD_DATE
+		       ,LM.DOWNLOAD_COUNT
+		       ,LM.LEC_NO
+		       ,LM.FILE_REF_NO
+		       ,LM.PROFESSOR_NO
+		       ,A.ATCH_ORIGIN_NAME
+		       ,A.ATCH_SIZE
+		  FROM LECTURE_MATERIAL LM
+		  LEFT JOIN FILE_REF F ON LM.FILE_REF_NO=F.FILE_REF_NO
+		  LEFT JOIN ATCH_FILE A ON F.ATCH_ID=A.ATCH_ID
+		   AND MATERIAL_NO=#{materialNo}
+		   AND LM.DELETE_STATUS='N'
+	</select>
+	
+	<update id="deleteLecureMaterial">
+		UPDATE LECTURE_MATERIAL
+		   SET DELETE_STATUS='Y'
+		 WHERE MATERIAL_NO=#{material}
+	</update>
+</mapper>

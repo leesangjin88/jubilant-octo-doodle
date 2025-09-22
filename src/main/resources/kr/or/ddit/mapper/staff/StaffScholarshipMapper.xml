@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.scholarship.mapper.StaffScholarshipMapper">
+	
+	
+	<select id="selectSholarshipTypeList" parameterType="int">
+		SELECT SCH_TYPE_NO
+	           , SCH_NAME
+	           , RATE
+	           , SCH_DESC
+	           , SCH_ACTIVE
+	           , SCH_FILE_REF_NO
+      FROM SCHOLARSHIP_TYPE 
+      WHERE SCH_ACTIVE = 'Y'
+      ORDER BY SCH_NAME
+      OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+	</select>
+	
+	<select id="selectSchTypeTotalCount">
+		SELECT COUNT(*) AS SCOUNT
+    	  FROM SCHOLARSHIP_TYPE
+    	 WHERE SCH_ACTIVE = 'Y'
+	</select>
+	
+	<select id="selectScholarship">
+		SELECT
+		    SCH_TYPE_NO,
+		    SCH_NAME,
+		    RATE,
+		    SCH_DESC,
+		    SCH_ACTIVE,
+		    SCH_FILE_REF_NO
+		FROM
+		    SCHOLARSHIP_TYPE
+		WHERE SCH_TYPE_NO = #{schTypeNo}
+	</select>
+	
+	<update id="updateScholarshipType" parameterType="kr.or.ddit.pfcp.common.vo.ScholarshipTypeVO">
+		UPDATE SCHOLARSHIP_TYPE
+		   SET SCH_NAME = #{schName}
+		       , SCH_DESC = #{schDesc}
+		       , SCH_FILE_REF_NO=#{schFileRefNo}
+		 WHERE SCH_TYPE_NO=#{schTypeNo}
+	</update>
+	
+	<insert id="insertScholarshipType" parameterType="kr.or.ddit.pfcp.common.vo.ScholarshipTypeVO">
+		INSERT INTO SCHOLARSHIP_TYPE (
+		    SCH_TYPE_NO,
+		    SCH_NAME,
+		    SCH_DESC,
+		    SCH_ACTIVE,
+		    SCH_FILE_REF_NO
+		) VALUES ( 'ST' || LPAD(SEQ_SCH_TYPE.NEXTVAL, 6, '0')
+		           , #{schName}
+		           , #{schDesc}
+		           , 'Y'
+		           , #{schFileRefNo} )
+	</insert>
+	
+	<update id="deleteScholarshipType" parameterType="String">
+		UPDATE SCHOLARSHIP_TYPE
+		   SET SCH_ACTIVE='N'
+		 WHERE SCH_TYPE_NO=#{schTypeNo}
+	</update>
+
+</mapper>

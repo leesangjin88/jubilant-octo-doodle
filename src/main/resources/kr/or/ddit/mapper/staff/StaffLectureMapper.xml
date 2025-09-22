@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.lecturemanage.lecture.mapper.StaffLectureMapper">
+
+ <resultMap id="lectureResultMap" type="kr.or.ddit.pfcp.common.vo.LectureVO">
+    <id property="lecNo" column="LEC_NO"/>
+    <result property="rnum" column="RNUM"/>
+    <result property="currentEnrollment" column="CURRENT_ENROLLMENT"/>
+    <result property="lecStatus" column="LEC_STATUS"/>
+    <result property="lrNo" column="LR_NO"/>
+    <result property="userNo" column="LECTURE_PROF_NO"/>
+    
+    <association property="user" javaType="kr.or.ddit.pfcp.common.vo.UserVO">
+    	<result property="userNo" column="USER_NO"/>
+    	<result property="userName" column="LECTURE_PROF_NAME"/>
+    	<result property="userName" column="USER_NAME"/>
+    </association>
+    
+    <association property="lectureReq" javaType="kr.or.ddit.pfcp.common.vo.LectureReqVO" autoMapping="true">
+        <id property="reqNo" column="REQ_NO"/>
+        <result property="subjectCode" column="SUBJECT_CODE"/>
+        <result property="userNo" column="LECTURE_REQ_PROF_NO"/>
+        <result property="preDay" column="PRE_DAY"/>
+        <result property="preTime" column="PRE_TIME"/>
+        <result property="preClassrm" column="PRE_CLASSRM"/>
+        <result property="status" column="STATUS"/>
+        <result property="rejReason" column="REJ_REASON"/>
+        <result property="reqDate" column="REQ_DATE"/>
+        <result property="maxCapacity" column="MAX_CAPACITY"/>
+        <result property="fileRefNo" column="FILE_REF_NO"/>
+        <result property="lecName" column="LEC_NAME"/>
+        <result property="lecCategory" column="LEC_CATEGORY"/>
+    </association>
+    
+    <association property="subject" javaType="kr.or.ddit.pfcp.common.vo.SubjectVO">
+        <id property="subjectCode" column="SUBJECT_CODE"/>
+        <result property="departmentNo" column="DEPARTMENT_NO"/>
+        <result property="gradeLevel" column="GRADE_LEVEL"/>
+        <result property="subjectName" column="SUBJECT_NAME"/>
+        <result property="credit" column="CREDIT"/>
+        <result property="subjectDesp" column="SUBJECT_DESP"/>
+        <result property="semesterNo" column="SEMESTER_NO"/>
+    </association>
+    
+    <association property="department" javaType="kr.or.ddit.pfcp.common.vo.DepartmentVO">
+    	<id property="departmentNo" column="DEPARTMENT_NO"/>
+    	<result property="departmentName" column="DEPARTMENT_NAME"/>
+        <result property="departmentTuition" column="DEPARTMENT_TUITION"/>
+        <result property="dgrNo" column="DGR_NO"/>
+        <result property="collegeNo" column="COLLEGE_NO"/>
+        <result property="departmentDesc" column="DEPARTMENT_DESC"/>
+    </association>
+    
+     <association property="lectureEnr" javaType="kr.or.ddit.pfcp.common.vo.LectureEnrVO" autoMapping="true">
+    	<id property="enrollNo" column="ENROLL_NO"/>
+    </association>
+</resultMap>
+
+ <resultMap id="lectureStudentResultMap" type="kr.or.ddit.pfcp.common.vo.LectureEnrVO" autoMapping="true">
+    <id property="enrollNo" column="ENROLL_NO"/>
+    
+    <association property="user" javaType="kr.or.ddit.pfcp.common.vo.UserVO" autoMapping="true"/>
+    
+    <association property="lecture" javaType="kr.or.ddit.pfcp.common.vo.LectureVO" autoMapping="true" />
+    
+    
+    <association property="lectureReq" javaType="kr.or.ddit.pfcp.common.vo.LectureReqVO" autoMapping="true">
+        <id property="reqNo" column="REQ_NO"/>
+    </association>
+    
+    <association property="subject" javaType="kr.or.ddit.pfcp.common.vo.SubjectVO" autoMapping="true">
+        <id property="subjectCode" column="SUBJECT_CODE"/>
+    </association>
+    
+    <association property="department" javaType="kr.or.ddit.pfcp.common.vo.DepartmentVO" autoMapping="true">
+    	<id property="departmentNo" column="DEPARTMENT_NO"/>
+    </association>
+    
+    <association property="student" javaType="kr.or.ddit.pfcp.common.vo.StudentVO" autoMapping="true">
+    	<id property="userNo" column="USER_NO"/>
+    </association>
+</resultMap>
+
+	<select id="selectLectureList" resultMap="lectureResultMap">
+		SELECT
+        ROW_NUMBER() OVER (ORDER BY L.LEC_NO) AS RNUM,
+        L.LEC_NO,
+        L.REQ_NO,
+        L.CURRENT_ENROLLMENT,
+        L.LEC_STATUS,
+        L.LR_NO,
+        L.USER_NO AS LECTURE_PROF_NO, -- LECTURE 테이블의 교수번호
+        U.USER_NAME AS LECTURE_PROF_NAME, -- TB_USER 테이블에서 가져온 교수 이름
+        LR.SUBJECT_CODE,
+        LR.USER_NO AS LECTURE_REQ_PROF_NO, -- LECTURE_REQ 테이블의 교수번호
+        LR.PRE_DAY,
+        LR.PRE_TIME,
+        LR.PRE_CLASSRM,
+        LR.STATUS,
+        LR.REJ_REASON,
+        LR.REQ_DATE,
+        LR.MAX_CAPACITY,
+        LR.FILE_REF_NO,
+        LR.LEC_NAME,
+        LR.LEC_CATEGORY,
+        -- SUBJECT 테이블의 모든 컬럼 추가
+        S.DEPARTMENT_NO,
+        S.GRADE_LEVEL,
+        S.SUBJECT_NAME,
+        S.CREDIT,
+        S.SUBJECT_DESP,
+        S.SEMESTER_NO
+    FROM
+        LECTURE L
+    JOIN
+        LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO
+    JOIN
+        TB_USER U ON L.USER_NO = U.USER_NO
+    JOIN
+        SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE -- SUBJECT 테이블 조인
+    OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+	</select>
+	
+	<select id="selectTotalCount">
+		SELECT COUNT(*)
+		  FROM LECTURE
+	</select>
+	
+	<select id="selectLectureStudent" parameterType="String" resultMap="lectureStudentResultMap">
+		SELECT
+		    LE.LEC_NO,
+		    LE.ENROLL_NO,
+		    LE.USER_NO,
+		    LE.ENROLL_STATUS,
+		    LE.ENROLL_TYPE,
+		    U.USER_NAME,
+		    S.DEPARTMENT_NO,
+		    D.DEPARTMENT_NAME
+		    ,LR.LEC_NAME
+		FROM
+		    LECTURE_ENR LE
+		JOIN TB_USER U ON LE.USER_NO = U.USER_NO
+		JOIN STUDENT S ON S.USER_NO = U.USER_NO
+		JOIN DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO
+		JOIN LECTURE L ON LE.LEC_NO = L.LEC_NO
+		JOIN LECTURE_REQ LR ON LR.REQ_NO = L.REQ_NO
+		WHERE LE.LEC_NO = #{lecNo}
+			  AND ENROLL_STATUS = '수강중'
+	</select> 
+	
+	<select id="selectLectureStudentTotalCount" parameterType="String">
+		SELECT
+			COUNT(*) AS TOTAL_COUNT
+		FROM
+		    LECTURE_ENR LE
+		JOIN TB_USER U ON LE.USER_NO = U.USER_NO
+		JOIN STUDENT S ON S.USER_NO = U.USER_NO
+		JOIN DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO
+		JOIN LECTURE L ON LE.LEC_NO = L.LEC_NO
+		JOIN LECTURE_REQ LR ON LR.REQ_NO = L.REQ_NO
+		WHERE LE.LEC_NO = #{lecNo}
+			  AND ENROLL_STATUS = '수강중'
+	</select> 
+
+</mapper>

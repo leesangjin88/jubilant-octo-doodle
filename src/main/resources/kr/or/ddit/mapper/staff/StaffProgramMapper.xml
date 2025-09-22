@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.pfcp.staff.program.mapper.StaffProgramMapper">
+	<resultMap id="programMap"
+		type="kr.or.ddit.pfcp.common.vo.ProgramVO">
+		<id property="programNo" column="PROGRAM_NO" />
+		<result property="userNo" column="USER_NO" />
+		<result property="typeCode" column="TYPE_CODE" />
+		<result property="programTitle" column="PROGRAM_TITLE" />
+		<result property="programDesp" column="PROGRAM_DESP" />
+		<result property="programCapacity" column="PROGRAM_CAPACITY" />
+		<result property="startDate" column="START_DATE" />
+		<result property="endDate" column="END_DATE" />
+		<result property="place" column="PLACE" />
+		<result property="programActive" column="PROGRAM_ACTIVE" />
+
+		<!-- TypeVO 조인 정보 매핑 -->
+		<association property="type"
+			javaType="kr.or.ddit.pfcp.common.vo.TypeVO">
+			<result property="typeCode" column="TYPE_CODE" />
+			<result property="typeName" column="TYPE_NAME" />
+			<result property="typeGroup" column="TYPE_GROUP" />
+			<result property="isActive" column="IS_ACTIVE" />
+		</association>
+	</resultMap>
+
+	<resultMap id="programWithEnrollMap"
+		type="kr.or.ddit.pfcp.common.vo.ProgramVO">
+		<id property="programNo" column="PROGRAM_NO" />
+		<result property="typeCode" column="TYPE_CODE" />
+		<result property="programTitle" column="PROGRAM_TITLE" />
+		<result property="programDesp" column="PROGRAM_DESP" />
+		<result property="programCapacity" column="PROGRAM_CAPACITY" />
+		<result property="startDate" column="START_DATE" />
+		<result property="endDate" column="END_DATE" />
+		<result property="place" column="PLACE" />
+		<result property="programActive" column="PROGRAM_ACTIVE" />
+		<result property="userNo" column="USER_NO" />
+
+		<!-- 신청자 목록 -->
+		<collection property="enrollList"
+			ofType="kr.or.ddit.pfcp.common.vo.ProgramEnrollVO">
+			<id property="enrollNo" column="ENROLL_NO" />
+			<result property="programNo" column="PROGRAM_NO" />
+			<result property="userNo" column="ENROLL_USER_NO" />
+			<result property="applyDate" column="APPLY_DATE" />
+			<result property="isAttended" column="IS_ATTENDED" />
+			<result property="isCompleted" column="IS_COMPLETED" />
+			<result property="programScore" column="PROGRAM_SCORE" />
+			<result property="volunteerHour" column="VOLUNTEER_HOUR" />
+			<result property="isCertIssued" column="IS_CERT_ISSUED" />
+
+			<!-- 중첩 association: STUDENT → USER -->
+			<association property="student"
+				javaType="kr.or.ddit.pfcp.common.vo.StudentVO">
+				<result property="userNo" column="ENROLL_USER_NO" />
+				<result property="userName" column="USER_NAME" />
+				<result property="departmentNo" column="DEPARTMENT_NO" />
+			</association>
+
+		</collection>
+	</resultMap>
+
+
+	<!--프로그램 목록 조회 -->
+	<select id="selectProgramList"
+		resultType="kr.or.ddit.pfcp.common.vo.ProgramVO"
+		resultMap="programMap">
+		SELECT
+		P.PROGRAM_NO
+		, P.TYPE_CODE
+		, P.PROGRAM_TITLE
+		,
+		P.PROGRAM_DESP
+		, P.PROGRAM_CAPACITY
+		, P.START_DATE
+		, P.END_DATE
+		, P.PLACE
+		, P.PROGRAM_ACTIVE
+		, P.USER_NO
+		, T.TYPE_CODE
+		, T.TYPE_NAME
+		, T.TYPE_GROUP
+		, T.IS_ACTIVE
+		FROM PROGRAM P
+		LEFT JOIN TYPE T ON P.TYPE_CODE =
+		T.TYPE_CODE
+		WHERE T.TYPE_GROUP = 'PROGRAM' AND P.PROGRAM_ACTIVE != 'D'
+		ORDER BY P.START_DATE DESC
+	</select>
+
+	<!--모집중인 프로그램만 조회 -->
+	<select id="selectOpenProgramList"
+		resultType="kr.or.ddit.pfcp.common.vo.ProgramVO"
+		resultMap="programMap">
+		SELECT
+		P.PROGRAM_NO
+		, P.TYPE_CODE
+		, P.PROGRAM_TITLE
+		,
+		P.PROGRAM_DESP
+		, P.PROGRAM_CAPACITY
+		, P.START_DATE
+		, P.END_DATE
+		, P.PLACE
+		, P.PROGRAM_ACTIVE
+		, P.USER_NO
+		, T.TYPE_CODE
+		, T.TYPE_NAME
+		, T.TYPE_GROUP
+		, T.IS_ACTIVE
+		FROM PROGRAM P
+		LEFT JOIN TYPE T ON P.TYPE_CODE =
+		T.TYPE_CODE
+		WHERE T.TYPE_GROUP = 'PROGRAM' AND P.PROGRAM_ACTIVE = 'N'
+		ORDER BY P.START_DATE DESC
+	</select>
+
+	<!--프로그램 단건 상세 조회 -->
+	<select id="selectProgramById" parameterType="string"
+		resultMap="programMap">
+		SELECT
+		P.PROGRAM_NO,
+		P.TYPE_CODE,
+		P.PROGRAM_TITLE,
+		P.PROGRAM_DESP,
+		P.PROGRAM_CAPACITY,
+		P.START_DATE,
+		P.END_DATE,
+		P.PLACE,
+		P.PROGRAM_ACTIVE,
+		P.USER_NO,
+		T.TYPE_CODE,
+		T.TYPE_NAME,
+		T.TYPE_GROUP,
+		T.IS_ACTIVE
+
+		FROM PROGRAM P
+		LEFT JOIN TYPE T ON P.TYPE_CODE = T.TYPE_CODE
+		WHERE P.PROGRAM_NO = #{programNo}
+	</select>
+
+	<!-- 비교과 프로그램 타입조회 -->
+	<select id="selectProgramType"
+		resultType="kr.or.ddit.pfcp.common.vo.TypeVO">
+		SELECT
+		TYPE_CODE
+		, TYPE_NAME
+		, IS_ACTIVE
+		, TYPE_GROUP
+		FROM TYPE
+		WHERE TYPE_GROUP='PROGRAM'
+	</select>
+
+	<insert id="insertProgram"
+		parameterType="kr.or.ddit.pfcp.common.vo.ProgramVO">
+		<selectKey resultType="string" keyProperty="programNo"
+			order="BEFORE">
+			SELECT 'PRG_' || LPAD(PROGRAM_SEQ.NEXTVAL, 5, '0')
+			FROM DUAL
+		</selectKey>
+
+		INSERT INTO PROGRAM (
+		PROGRAM_NO
+		, TYPE_CODE
+		, PROGRAM_TITLE
+		,
+		PROGRAM_DESP
+		, PROGRAM_CAPACITY
+		, START_DATE
+		, END_DATE
+		, PLACE,
+		PROGRAM_ACTIVE
+		, USER_NO
+		) VALUES (
+		#{programNo}
+		, #{typeCode}
+		,
+		#{programTitle}
+		, #{programDesp}
+		, #{programCapacity}
+		, #{startDate}
+		,
+		#{endDate}
+		, #{place}
+		, #{programActive}
+		, #{userNo}
+		)
+	</insert>
+	<!-- 수정 -->
+	<update id="updateProgram"
+		parameterType="kr.or.ddit.pfcp.common.vo.ProgramVO">
+		UPDATE PROGRAM SET
+		TYPE_CODE = #{typeCode},
+		PROGRAM_TITLE
+		= #{programTitle},
+		PROGRAM_DESP = #{programDesp},
+		PROGRAM_CAPACITY =
+		#{programCapacity},
+		START_DATE = #{startDate},
+		END_DATE = #{endDate},
+		PLACE = #{place},
+		PROGRAM_ACTIVE = #{programActive}
+		WHERE PROGRAM_NO =
+		#{programNo}
+	</update>
+
+	<!--비교과 신청 목록 조회 -->
+	<select id="selectEnrollListByProgramNo"
+		resultType="kr.or.ddit.pfcp.common.vo.ProgramEnrollVO">
+		SELECT E.ENROLL_NO
+		, E.PROGRAM_NO
+		, E.USER_NO
+		, E.APPLY_DATE
+		,
+		E.IS_ATTENDED
+		, E.IS_COMPLETED
+		, E.PROGRAM_SCORE
+		, E.VOLUNTEER_HOUR
+		,
+		E.IS_CERT_ISSUED
+		, S.USER_NO
+		FROM PROGRAM_ENROLL E
+		JOIN STUDENT S ON
+		E.USER_NO = S.USER_NO
+		WHERE E.PROGRAM_NO = #{programNo}
+	</select>
+
+	<update id="deleteProgram">
+		UPDATE PROGRAM
+		SET PROGRAM_ACTIVE = 'D'
+		WHERE
+		PROGRAM_NO = #{programNo}
+	</update>
+
+	<select id="selectProgramWithEnroll"
+		resultMap="programWithEnrollMap">
+		SELECT
+		P.PROGRAM_NO, P.TYPE_CODE, P.PROGRAM_TITLE,
+		P.PROGRAM_DESP,
+		P.PROGRAM_CAPACITY, P.START_DATE, P.END_DATE, P.PLACE,
+		P.PROGRAM_ACTIVE, P.USER_NO,
+
+		E.ENROLL_NO, E.USER_NO AS ENROLL_USER_NO,
+		E.APPLY_DATE,
+		E.IS_ATTENDED, E.IS_COMPLETED, E.PROGRAM_SCORE,
+		E.VOLUNTEER_HOUR, E.IS_CERT_ISSUED, S.DEPARTMENT_NO,
+		U.USER_NAME
+
+		FROM
+		PROGRAM P
+		LEFT JOIN PROGRAM_ENROLL E ON P.PROGRAM_NO = E.PROGRAM_NO
+		LEFT JOIN STUDENT S ON E.USER_NO = S.USER_NO
+		LEFT JOIN TB_USER U ON
+		S.USER_NO = U.USER_NO
+
+		WHERE P.PROGRAM_NO = #{programNo}
+
+	</select>
+
+	<update id="updateAttended"
+		parameterType="kr.or.ddit.pfcp.common.vo.ProgramEnrollVO">
+		UPDATE PROGRAM_ENROLL
+		SET IS_ATTENDED = #{isAttended}
+		WHERE ENROLL_NO = #{enrollNo}
+	</update>
+	<update id="updateCompletion"
+	parameterType="kr.or.ddit.pfcp.common.vo.ProgramEnrollVO">
+		UPDATE PROGRAM_ENROLL
+		SET IS_COMPLETED = #{isCompleted}
+		WHERE ENROLL_NO = #{enrollNo}
+	</update>
+	
+	<update id="updateIsCertIssued" parameterType="string">
+		UPDATE PROGRAM_ENROLL
+		SET IS_CERT_ISSUED = 'Y'
+		WHERE ENROLL_NO = #{enrollNo}
+	</update>
+	
+	
+
+
+</mapper>

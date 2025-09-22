@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.pfcp.student.eclass.assignement.mapper.AssignSubmissionMapper">
+	<resultMap id="assignmentWithUserResultMap" type="kr.or.ddit.pfcp.common.vo.AssignmentSubmissionVO">
+	    <result property="submitNo" column="SUBMIT_NO"/>
+	    <result property="submitDate" column="SUBMIT_DATE"/>
+	    <result property="submitScore" column="SUBMIT_SCORE"/>
+	    <result property="assignNo" column="ASSIGN_NO"/>
+	    <result property="studentNo" column="STUDENT_NO"/>
+	    <result property="fileRefNo" column="FILE_REF_NO"/>
+	    
+	    <!-- 중첩 객체 매핑 -->
+	    <association property="user" javaType="UserVO">
+	        <result property="userNo" column="USER_NO"/>
+	        <result property="userName" column="USER_NAME"/>
+	    </association>
+	    
+	    <association property="atchFile" javaType="AtchFileVO">
+	    	<result property="atchOriginName" column="ATCH_ORIGIN_NAME"/>
+	    </association>
+	</resultMap>
+	
+	<insert id="insertAssignSubmission">
+		INSERT INTO ASSIGN_SUBMISSION(
+			SUBMIT_NO, 
+        	SUBMIT_DATE, 
+        	ASSIGN_NO, 
+        	STUDENT_NO,
+        	FILE_REF_NO
+        	)VALUES(
+        	'ASUB' || LPAD(SEQ_ASSIGN_SUBMISSION.NEXTVAL, 3, '0'),
+	         TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+	         #{assignNo}, 
+	         #{studentNo}, 
+	         #{fileRefNo})
+	</insert>
+	
+	<select id="existsSubmission">
+	  SELECT 
+	    CASE 
+	        WHEN EXISTS (
+	            SELECT 1 
+	            FROM ASSIGN_SUBMISSION 
+	            WHERE ASSIGN_NO = #{assignNo} 
+	              AND STUDENT_NO = #{studentNo}
+	        ) THEN 1 
+	        ELSE 0 
+	    END AS has_submitted
+	  FROM DUAL
+	</select>
+	
+	<update id="updateAssignSubmissionFile">
+	  UPDATE ASSIGN_SUBMISSION
+	  SET 
+	    FILE_REF_NO = #{fileRefNo},
+	    SUBMIT_DATE = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+	  WHERE ASSIGN_NO = #{assignNo}
+	    AND STUDENT_NO = #{studentNo}
+	</update>
+
+    <update id="updateAssignmentSubmission">
+        UPDATE ASSIGN_SUBMISSION
+        SET
+            SUBMIT_DATE = #{submitDate},
+            ASSIGN_NO = #{assignNo},
+            FILE_REF_NO = #{fileRefNo}
+        WHERE
+            SUBMIT_NO = #{submitNo} AND STUDENT_NO = #{studentNo}
+    </update>
+	
+	<select id="selectAssignmentSubmission">
+	    SELECT
+	        S.SUBMIT_NO,
+	        S.FILE_REF_NO,
+	        A.ATCH_ORIGIN_NAME AS fileName,
+	        S.SUBMIT_SCORE
+	    FROM ASSIGN_SUBMISSION S
+	    LEFT JOIN FILE_REF F ON S.FILE_REF_NO = F.FILE_REF_NO
+	    LEFT JOIN ATCH_FILE A ON F.ATCH_ID = A.ATCH_ID
+	    WHERE S.ASSIGN_NO = #{assignNo}
+	      AND S.STUDENT_NO = #{studentNo}
+	</select>
+	
+	<select id="selectAssignmentListByAssignNo" resultMap="assignmentWithUserResultMap">
+		SELECT 
+		    a.SUBMIT_NO,
+		    a.SUBMIT_DATE,
+		    a.SUBMIT_SCORE,
+		    a.ASSIGN_NO,
+		    a.STUDENT_NO,
+		    a.FILE_REF_NO,
+		    u.USER_NO,
+		    u.USER_NAME,
+		    af.ATCH_ORIGIN_NAME
+		FROM ASSIGN_SUBMISSION a
+		INNER JOIN TB_USER u ON a.STUDENT_NO = u.USER_NO
+		LEFT OUTER JOIN FILE_REF f ON a.FILE_REF_NO = f.FILE_REF_NO
+		LEFT OUTER JOIN ATCH_FILE af ON f.ATCH_ID = af.ATCH_ID
+		WHERE a.ASSIGN_NO = #{assignNo}
+	</select>
+	
+	<update id="updateAssignSubmissionScore">
+		UPDATE ASSIGN_SUBMISSION
+		   SET SUBMIT_SCORE=#{submitScore}
+		 WHERE SUBMIT_NO=#{submitNo}
+	</update>
+</mapper>

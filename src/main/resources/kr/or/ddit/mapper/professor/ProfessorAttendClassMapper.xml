@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.professor.attendclass.mapper.ProfessorAttendClassMapper">
+ <resultMap id="lecReqResultMap" type="LectureReqVO">
+        <id property="reqNo" column="REQ_NO"/>
+        <result property="subjectName" column="SUBJECT_NAME"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="lecName" column="LEC_NAME"/>
+        <result property="lecCategory" column="LEC_CATEGORY"/>
+        <result property="preDay" column="PRE_DAY"/>
+        <result property="preTime" column="PRE_TIME"/>
+        <result property="preClassrm" column="PRE_CLASSRM"/>
+        <result property="maxCapacity" column="MAX_CAPACITY"/>
+        <result property="reqDate" column="REQ_DATE"/>
+        <result property="fileRefNo" column="FILE_REF_NO"/>
+        <result property="status" column="STATUS"/>
+        <result property="lecNo" column="LEC_NO"/>
+        <association property="atchFile" javaType="kr.or.ddit.pfcp.common.vo.AtchFileVO">
+            <id property="atchId" column="ATCH_ID"/>
+            <result property="atchOriginName" column="ATCH_ORIGIN_NAME"/>
+            </association>
+    </resultMap>
+
+    <resultMap id="lectureEnrResultMap" type="kr.or.ddit.pfcp.common.vo.LectureEnrVO">
+        <result property="userNo" column="USER_NO"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="collegeName" column="COLLEGE_NAME"/>
+        <result property="departmentName" column="DEPARTMENT_NAME"/>
+        <result property="enrollNo" column="ENROLL_NO"/>
+        <result property="lecNo" column="LEC_NO_ENR"/> <result property="enrollTime" column="ENROLL_TIME"/>
+        <result property="enrollStatus" column="ENROLL_STATUS"/>
+        <result property="enrollType" column="ENROLL_TYPE"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="attendance" column="ATTENDANCE"/>
+        <result property="evalYn" column="EVAL_YN"/>
+        <result property="grade" column="GRADE"/>
+        <result property="gradePoint" column="GRADE_POINT"/>
+        <result property="subjectName" column="SUBJECT_NAME_ENR"/> <result property="preDay" column="PRE_DAY"/>
+        <result property="preTime" column="PRE_TIME"/>
+        <result property="professorName" column="PROFESSOR_NAME"/>
+    </resultMap>
+
+
+    <select id="cntEnrStd" resultType="int">
+        SELECT
+            COUNT(LE.USER_NO)
+        FROM
+            LECTURE_ENR LE
+        INNER JOIN
+            TB_USER TU ON LE.USER_NO = TU.USER_NO
+        INNER JOIN
+            STUDENT STU ON TU.USER_NO = STU.USER_NO
+        INNER JOIN
+            DEPARTMENT DEP ON STU.DEPARTMENT_NO = DEP.DEPARTMENT_NO
+        INNER JOIN
+            COLLEGE COL ON DEP.COLLEGE_NO = COL.COLLEGE_NO
+        WHERE LE.LEC_NO = #{lecNo}
+    </select>
+
+    <select id="selEnrStdPaging" resultMap="lectureEnrResultMap">
+		    SELECT
+			    A.USER_NO,
+			    A.USER_NAME,
+			    A.COLLEGE_NAME,
+			    A.DEPARTMENT_NAME,
+			    A.ENROLL_NO,  A.LEC_NO_ENR   FROM (
+			    SELECT
+			        LE.USER_NO,
+			        TU.USER_NAME,
+			        COL.COLLEGE_NAME,
+			        DEP.DEPARTMENT_NAME,
+                    LE.ENROLL_NO,  LE.LEC_NO AS LEC_NO_ENR, ROW_NUMBER() OVER (PARTITION BY LE.USER_NO ORDER BY TU.USER_NAME ASC) AS RN_DEDUP,
+			        ROW_NUMBER() OVER (ORDER BY TU.USER_NAME ASC, LE.USER_NO ASC) AS RNUM
+			    FROM
+			        LECTURE_ENR LE
+			    INNER JOIN
+			        TB_USER TU ON LE.USER_NO = TU.USER_NO
+			    INNER JOIN
+			        STUDENT STU ON TU.USER_NO = STU.USER_NO
+			    INNER JOIN
+			        DEPARTMENT DEP ON STU.DEPARTMENT_NO = DEP.DEPARTMENT_NO
+			    INNER JOIN
+			        COLLEGE COL ON DEP.COLLEGE_NO = COL.COLLEGE_NO
+			    WHERE LE.LEC_NO = #{lecNo} ) A
+			WHERE A.RN_DEDUP = 1
+			  AND A.RNUM > #{offset}
+			  AND A.RNUM <![CDATA[ <= ]]> (#{offset} + #{size})
+			ORDER BY A.USER_NAME ASC, A.USER_NO ASC
+    </select>
+
+</mapper>

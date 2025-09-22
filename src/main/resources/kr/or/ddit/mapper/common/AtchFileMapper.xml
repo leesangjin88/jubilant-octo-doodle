@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.common.mapper.AtchFileMapper">
+	<insert id="insertAtchFile" parameterType="kr.or.ddit.pfcp.common.vo.AtchFileVO">
+	    INSERT INTO ATCH_FILE (
+	        ATCH_ID,
+	        ATCH_MIME,
+	        ATCH_ORIGIN_NAME,
+	        ATCH_SAVE_NAME,
+	        ATCH_SIZE,
+	        ATCH_DATE,
+	        ATCH_CONTENT
+	    )
+	    VALUES (
+	        #{atchId},
+	        #{atchMime},
+	        #{atchOriginName},
+	        #{atchSaveName},
+	        #{atchSize},
+	        #{atchDate},
+	        #{atchContent, jdbcType=BLOB}
+	    )
+	</insert>
+	
+	<select id="selectAtchFile">
+		SELECT ATCH_ID
+			   , ATCH_MIME
+               , ATCH_ORIGIN_NAME
+			   , ATCH_SAVE_NAME
+			   , ATCH_SIZE
+			   , ATCH_DATE
+			   , ATCH_CONTENT
+		  FROM ATCH_FILE
+		 WHERE ATCH_ID=#{atchId}   
+			 
+	</select>
+</mapper>

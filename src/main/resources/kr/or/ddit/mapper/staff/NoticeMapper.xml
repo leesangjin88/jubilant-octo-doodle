@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.notice.mapper.NoticeMapper">
+	<resultMap id="boardWithScheduleMap" type="kr.or.ddit.pfcp.common.vo.BoardVO">
+	    <id property="boardNo" column="BOARD_NO" />
+	    <result property="boardTitle" column="BOARD_TITLE" />
+	    <result property="boardContent" column="BOARD_CONTENT" />
+	    <result property="writerNo" column="WRITER_NO" />
+	    <result property="postDate" column="POST_DATE" />
+	    <result property="updateDate" column="UPDATE_DATE" />
+	    <result property="category" column="CATEGORY" />
+	    <result property="typeCode" column="TYPE_CODE" />
+	    <result property="scheduleNo" column="SCHEDULE_NO" />
+	
+	    <association property="schedule" javaType="kr.or.ddit.pfcp.common.vo.ScheduleVO">
+	        <result property="scheduleNo" column="SCHEDULE_NO" />
+	        <result property="isNotice" column="IS_NOTICE" />
+	        <result property="isActive" column="IS_ACTIVE" />
+	    </association>
+	    
+	    <association property="user" javaType="kr.or.ddit.pfcp.common.vo.UserVO" autoMapping="true">
+	        <result property="userName" column="USER_NAME" />
+	    </association>
+	</resultMap>
+
+	<update id="updateBoardDeleted" parameterType="kr.or.ddit.pfcp.common.vo.BoardVO">
+		UPDATE BOARD
+			SET
+				CATEGORY = '삭제',
+				TYPE_CODE = 'DEL'
+		WHERE BOARD_NO = #{boardNo}
+	</update>
+	
+	<select id="selectBoardList" resultType="kr.or.ddit.pfcp.common.vo.BoardVO" resultMap="boardWithScheduleMap">
+	SELECT
+		B.BOARD_NO
+		, B.BOARD_TITLE
+		, B.BOARD_CONTENT
+		, B.WRITER_NO
+		, B.POST_DATE
+		, B.UPDATE_DATE
+		, B.CATEGORY
+		, B.TYPE_CODE
+		, B.SCHEDULE_NO
+		, U.USER_NAME
+	FROM BOARD B
+	LEFT JOIN SCHEDULE S ON B.SCHEDULE_NO = S.SCHEDULE_NO
+	LEFT JOIN TB_USER U ON B.WRITER_NO = U.USER_NO 
+	WHERE
+	(B.SCHEDULE_NO IS NULL OR (B.SCHEDULE_NO IS NOT NULL AND S.IS_ACTIVE = 'Y'))
+	AND B.CATEGORY != '삭제'
+	
+	ORDER BY B.UPDATE_DATE DESC
+	OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+	</select>
+	
+	<select id="selectTotalCount">
+		SELECT COUNT(*)
+		FROM BOARD B
+		LEFT JOIN SCHEDULE S ON B.SCHEDULE_NO = S.SCHEDULE_NO
+		WHERE
+		  (B.SCHEDULE_NO IS NULL OR (B.SCHEDULE_NO IS NOT NULL AND S.IS_ACTIVE = 'Y'))
+		  AND B.CATEGORY != '삭제'
+	</select>
+
+	
+	<select id="selectBoard" parameterType="String">
+		SELECT
+		    BOARD_NO,
+		    BOARD_TITLE,
+		    BOARD_CONTENT,
+		    WRITER_NO,
+		    POST_DATE,
+		    UPDATE_DATE,
+		    CATEGORY,
+		    TYPE_CODE
+		FROM
+		    BOARD
+		WHERE 
+			BOARD_NO = #{boardNo}
+	</select>
+	
+	<update id="updateBoard" parameterType="kr.or.ddit.pfcp.common.vo.BoardVO">
+		UPDATE BOARD
+		<set>
+			BOARD_TITLE = #{boardTitle},
+			BOARD_CONTENT = #{boardContent},
+			UPDATE_DATE = TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+<!-- 			<if test="category != null and category != ''"> -->
+<!-- 				, CATEGORY = #{category} -->
+<!-- 			</if> -->
+	
+<!-- 			<if test="typeCode != null and typeCode != ''"> -->
+<!-- 				, TYPE_CODE = #{typeCode} -->
+<!-- 			</if> -->
+		</set>
+		WHERE BOARD_NO = #{boardNo}
+	</update>
+	
+	<insert id="insertBoard" parameterType="kr.or.ddit.pfcp.common.vo.BoardVO">
+		INSERT INTO BOARD (
+			BOARD_NO
+			, BOARD_TITLE
+			, BOARD_CONTENT
+			, WRITER_NO
+			, POST_DATE
+			, UPDATE_DATE
+			, CATEGORY
+			, TYPE_CODE
+			, SCHEDULE_NO
+		) VALUES (
+		'B' || LPAD(BOARD_NO_SEQ.NEXTVAL, 3, '0')
+		, #{boardTitle}
+		, #{boardContent}
+		, #{writerNo}
+		, TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+		, TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
+		, CASE #{typeCode}
+            WHEN 'GEN' THEN '일반'
+            WHEN 'EXT' THEN '비교과'     
+            WHEN 'SUG' THEN '건의사항'
+            WHEN 'ETC' THEN '기타'
+            WHEN 'ACA_SCH' THEN '학사'  -- 수강신청
+            WHEN 'ACA_EXM' THEN '학사'  -- 시험 및 평가 일정
+            WHEN 'ACA_STA' THEN '학사'  -- 학적 변경
+            WHEN 'ACA_GRD' THEN '학사'  -- 졸업
+            WHEN 'ACA_TUI' THEN '학사'  -- 등록금 및 장학금
+            WHEN 'ACA_HOL' THEN '학사'  -- 방학 및 휴일
+            ELSE 'ETC'                 -- 정의되지 않은 TypeCode의 경우 기본값
+          END
+		, #{typeCode}
+		, #{scheduleNo}
+		)
+	</insert>
+	
+	<select id="selectByScheduleNo" resultType="kr.or.ddit.pfcp.common.vo.BoardVO">
+    	SELECT BOARD_NO 
+    		, BOARD_TITLE
+			, BOARD_CONTENT
+			, WRITER_NO
+			, POST_DATE
+			, UPDATE_DATE
+			, CATEGORY
+			, TYPE_CODE
+			, SCHEDULE_NO
+		FROM BOARD 
+		WHERE SCHEDULE_NO = #{scheduleNo}
+	</select>
+	
+</mapper>

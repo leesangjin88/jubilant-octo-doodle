@@ -1,0 +1,316 @@
+/* mypage.css additions for circular icon buttons */
+
+/* Styles for the new icon buttons under profile picture */
+.mypage-container .profile-icon-buttons {
+    display: flex;
+    justify-content: center; /* Center the buttons horizontally */
+    gap: 20px; /* Space between the two icon buttons */
+    margin-top: 20px; /* Space above the buttons from the profile image */
+}
+
+.mypage-container .profile-icon-buttons .icon-button {
+    display: flex;
+    flex-direction: column; /* Keep column for consistent centering even without text */
+    align-items: center; /* Center items horizontally within the button */
+    justify-content: center; /* Center items vertically within the button */
+    text-decoration: none; /* Remove underline from link */
+    color: #555; /* Default icon color */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 60px; /* Adjusted fixed width for circular button */
+    height: 60px; /* Adjusted fixed height for circular button */
+    border-radius: 50%; /* Make it circular */
+    background-color: #f0f2f5; /* Light background for the circle */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    padding: 0; /* Remove padding as there's no text */
+}
+
+.mypage-container .profile-icon-buttons .icon-button:hover {
+    background-color: #e0e2e5; /* Darker background on hover */
+    color: #333;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mypage-container .profile-icon-buttons .icon-button i {
+    font-size: 2em; /* Slightly larger icon size for emphasis */
+    margin-bottom: 0; /* Removed margin-bottom as there's no text below it */
+    color: #6a6ee0; /* Icon color */
+}
+
+/* NEW: Styles for the profile placeholder icon */
+.mypage-container .profile-image-section .profile-placeholder-icon {
+    font-size: 5em; /* Make the icon large enough to fill the circle */
+    color: #ccc; /* Light gray color to indicate a placeholder */
+    /* The parent .profile-image-section already centers its content using flexbox */
+}
+
+/* NEW: Styles for the edit icons in section headers */
+.mypage-container .section-header .edit-section-icon {
+    margin-left: auto; /* Pushes the icon to the far right */
+    color: #999; /* Similar color to the previous help icon */
+    font-size: 1em; /* Similar size */
+    cursor: pointer;
+    padding: 5px; /* Add some padding for easier clicking */
+    border-radius: 50%; /* Make it slightly clickable as a circular target */
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.mypage-container .section-header .edit-section-icon:hover {
+    background-color: #eee; /* Light background on hover */
+    color: #6a6ee0; /* Highlight color on hover */
+}
+
+
+/* Original mypage.css content (unchanged parts, excluding .bottom-buttons) */
+/*
+   Base styles for the MyPage container.
+   This div acts as the main wrapper for the MyPage content.
+*/
+.mypage-container {
+    font-family: Arial, sans-serif; /* Set font for MyPage content */
+    background-color: #fff; /* White background for the main content card */
+    margin: 15px auto; /* Centers the container horizontally within its parent */
+    padding: 20px;
+    display: flex; /* Flex container for the two main columns (left-column and content-area) */
+    width: 100%;
+    max-width: 1200px; /* Increased max-width for wider layout */
+    gap: 20px; /* Space between the left column and content area */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Subtle shadow for the main card */
+}
+
+/* Wrapper for user-info-card and quick-links */
+.mypage-container .left-column {
+    flex: 0 0 300px; /* Slightly wider left column */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 500px; /* Added min-height to make it taller */
+}
+
+.mypage-container .user-info-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Individual card shadow */
+}
+
+.mypage-container .user-name {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.mypage-container .user-id {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.mypage-container .profile-image-section {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mypage-container .profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.mypage-container .profile-actions {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    gap: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    padding: 3px 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mypage-container .profile-action-icon {
+    font-size: 0.9em;
+    color: #555;
+    cursor: pointer;
+}
+
+.mypage-container .quick-links {
+    display: flex; /* Flex for horizontal arrangement of quick-link-items */
+    gap: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.mypage-container .quick-link-item {
+    flex: 1; /* Distribute space evenly among items */
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.mypage-container .quick-link-item:hover {
+    background-color: #f9f9f9;
+}
+
+.mypage-container .quick-link-item .icon-large {
+    font-size: 2em;
+    color: #6a6ee0; /* Example color */
+    margin-bottom: 5px;
+}
+
+.mypage-container .quick-link-item p {
+    margin: 0;
+    font-size: 1em;
+    font-weight: bold;
+    color: #333;
+}
+
+.mypage-container .quick-link-item .small-text {
+    font-size: 0.8em;
+    color: #888;
+}
+
+
+/* Content area styles */
+.mypage-container .content-area {
+    flex: 1; /* Allows content-area to take up remaining space */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.mypage-container .section-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.mypage-container .section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.mypage-container .section-icon {
+    font-size: 1.5em;
+    color: #6a6ee0; /* Example color */
+    margin-right: 10px;
+}
+
+.mypage-container .section-header h2 {
+    margin: 0;
+    font-size: 1.3em;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Removed .help-icon as it's replaced by .edit-section-icon */
+/* .mypage-container .help-icon {
+    margin-left: auto;
+    color: #999;
+    font-size: 1em;
+    cursor: pointer;
+} */
+
+.mypage-container .section-description {
+    font-size: 0.9em;
+    color: #777;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.mypage-container .contact-info-details,
+.mypage-container .password-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mypage-container .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.mypage-container .info-item:last-child {
+    border-bottom: none;
+}
+
+.mypage-container .info-item span:first-child {
+    font-weight: 500;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mypage-container .info-item span:last-child {
+    color: #333;
+    font-weight: normal;
+}
+
+
+.mypage-container .info-item .fas,
+.mypage-container .info-item .far {
+    color: #6a6ee0;
+    font-size: 0.9em;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mypage-container {
+        flex-direction: column; /* Stack columns vertically */
+        padding: 15px;
+        margin: 15px auto; /* Adjust margin for smaller screens */
+    }
+
+    .mypage-container .left-column {
+        flex: auto;
+        width: 100%; /* Take full width */
+        min-height: auto; /* Reset min-height for smaller screens */
+    }
+
+    .mypage-container .quick-links {
+        flex-direction: column; /* Stack quick links vertically */
+    }
+
+    .mypage-container .profile-icon-buttons {
+        flex-direction: row; /* Keep them side-by-side or adjust as desired for mobile */
+        justify-content: center; /* Center icons for mobile */
+        gap: 20px; /* Maintain gap */
+    }
+
+    .mypage-container .profile-icon-buttons .icon-button {
+        width: 50px; /* Slightly smaller for mobile, purely icon */
+        height: 50px;
+    }
+
+    .mypage-container .profile-icon-buttons .icon-button i {
+        font-size: 1.8em; /* Adjusted icon size for smaller buttons */
+    }
+
+}

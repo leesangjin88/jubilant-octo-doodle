@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+ * == 개정이력(Modification Information) ==
+ * 수정일		수정자	수정내용
+ * ========================================
+ * 250704	김태수	최초 생성
+ -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.professor.lecture.mapper.ProfessorLectureMapper">
+
+	<resultMap id="ProfessorLectureMap" type="LectureReqVO">
+		<id property="reqNo" column="REQ_NO"/> 
+		
+		<result property="subjectCode" column="SUBJECT_CODE"/>
+		<result property="lecName" column="LEC_NAME"/>
+		<result property="reqDate" column="REQ_DATE"/>
+		<result property="status" column="STATUS"/>
+		<result property="rejReason" column="REJ_REASON"/>
+		
+		<result property="rnum" column="RNUM"/> 
+		
+		<result property="userName" column="USER_NAME"/> 
+		<result property="subjectName" column="SUBJECT_NAME"/>
+		
+		<result property="lecCategory" column="LEC_CATEGORY"/>
+	    <result property="preDay" column="PRE_DAY"/>
+	    <result property="preTime" column="PRE_TIME"/>
+	    <result property="preClassrm" column="PRE_CLASSRM"/>
+	    <result property="maxCapacity" column="MAX_CAPACITY"/>
+	    <result property="fileRefNo" column="FILE_REF_NO"/>
+		
+	</resultMap>
+	
+	<resultMap id="ProfessorApprovedLectureMap" type="LectureVO" autoMapping="false">
+	    <id property="lecNo" column="LEC_NO" />
+	    <result property="reqNo" column="REQ_NO" />
+	    <result property="currentEnrollment" column="CURRENT_ENROLLMENT" />
+	    <result property="lecStatus" column="LEC_STATUS" />
+	    <result property="lrNo" column="LR_NO" />
+	    <result property="userNo" column="USER_NO" />
+    
+    <association property="subject" javaType="SubjectVO">
+        <id property="subjectCode" column="SUBJECT_CODE" />
+        <result property="departmentNo" column="DEPARTMENT_NO" />
+        <result property="gradeLevel" column="GRADE_LEVEL" />
+        <result property="subjectName" column="SUBJECT_NAME" />
+        <result property="credit" column="CREDIT" />
+        <result property="subjectDesp" column="SUBJECT_DESP" />
+        <result property="semesterNo" column="SEMESTER_NO" />
+    </association>
+    
+    <association property="lectureReq" javaType="LectureReqVO" columnPrefix="LR_">
+    	<result property="lecName" column="LEC_NAME" />
+    </association>
+</resultMap>
+
+
+	<select id="selectLectureList" resultMap="ProfessorLectureMap" parameterType="String">
+		  SELECT
+            LR.REQ_NO,
+            LR.SUBJECT_CODE,
+            LR.LEC_NAME,
+            U.USER_NAME,
+            S.SUBJECT_NAME, 
+            LR.REQ_DATE,          
+            LR.STATUS,
+            LR.REJ_REASON,
+            L.LEC_NO
+        FROM
+            LECTURE_REQ LR
+        JOIN
+            SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE
+        JOIN
+            PROFESSOR P ON LR.USER_NO = P.USER_NO    
+        JOIN
+            TB_USER U ON P.USER_NO = U.USER_NO         
+        JOIN
+            LECTURE L ON LR.REQ_NO = L.REQ_NO
+        LEFT JOIN                                    
+            FILE_REF F ON LR.FILE_REF_NO = F.FILE_REF_NO
+        WHERE
+            LR.USER_NO = #{userNo}              
+        ORDER BY
+            LR.REQ_NO DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+	</select>
+
+	<select id="selectLecture">
+		SELECT
+            LR.REQ_NO,
+            LR.SUBJECT_CODE,
+            LR.LEC_NAME,
+            U.USER_NAME,
+            S.SUBJECT_NAME, 
+            LR.REQ_DATE,          
+            LR.STATUS,
+            LR.REJ_REASON,
+            U.USER_NO
+        FROM
+            LECTURE_REQ LR
+        JOIN
+            SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE
+        JOIN
+            PROFESSOR P ON LR.USER_NO = P.USER_NO    
+        JOIN
+            TB_USER U ON P.USER_NO = U.USER_NO         
+        LEFT JOIN                                    
+            FILE_REF F ON LR.FILE_REF_NO = F.FILE_REF_NO
+        WHERE
+            LR.USER_NO = #{userNo}              
+        ORDER BY
+            LR.REQ_NO
+	</select>
+	
+	<select id="selectLectureDetail" resultMap="ProfessorLectureMap" parameterType="String">
+	    SELECT
+	        LR.REQ_NO,
+	        LR.SUBJECT_CODE,
+	        LR.LEC_NAME,
+	        LR.REQ_DATE,
+	        LR.STATUS,
+	        LR.REJ_REASON,
+	        LR.LEC_CATEGORY,        
+			LR.PRE_DAY,             
+			LR.PRE_TIME,            
+			LR.PRE_CLASSRM,         
+			LR.MAX_CAPACITY,        
+			LR.FILE_REF_NO,         
+			U.USER_NAME,
+	        S.SUBJECT_NAME,
+	        L.LEC_NO
+	    FROM
+	        LECTURE_REQ LR
+	    JOIN
+	        SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE
+	    JOIN
+	        PROFESSOR P ON LR.USER_NO = P.USER_NO
+	    JOIN
+	        TB_USER U ON P.USER_NO = U.USER_NO
+	    JOIN 
+	    	LECTURE L ON LR. REQ_NO = L.REQ_NO
+	    WHERE
+	        LR.REQ_NO = #{reqNo}    
+	</select>
+	
+	
+	<select id="selectLectureTotalCnt">
+		SELECT COUNT(*)
+			FROM LECTURE_REQ
+	</select>
+	
+	<select id="selectApprovedLectures" resultMap="ProfessorLectureMap">
+        SELECT
+            REQ_NO,
+            SUBJECT_CODE,
+            SUBJECT_NAME,
+            USER_NAME,
+            LEC_NAME,
+            REQ_DATE,
+            STATUS
+        FROM TB_LECTURE
+        WHERE STATUS = '승인'
+    </select>
+
+	<insert id="insertLecture" parameterType="LectureReqVO">
+    INSERT INTO LECTURE_REQ (
+        REQ_NO, SUBJECT_CODE, USER_NO, PRE_DAY, PRE_TIME, PRE_CLASSRM,
+        STATUS, REJ_REASON, REQ_DATE, MAX_CAPACITY, FILE_REF_NO, LEC_NAME, LEC_CATEGORY
+    ) VALUES (
+        'REQ' || LPAD(SEQ_LECTURE_REQ.NEXTVAL, 3, '0'),  
+        #{subjectCode},
+        #{userNo},
+        #{preDay},
+        #{preTime},
+        #{preClassrm},
+        '대기',
+        NULL,   
+        TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+        #{maxCapacity},
+        #{fileRefNo},
+        #{lecName},
+        #{lecCategory}
+    )
+</insert>
+
+
+
+ <select id="selectLectureCategories" resultType="string">
+        SELECT DISTINCT LEC_CATEGORY
+		FROM LECTURE_REQ 
+    </select>
+
+    <select id="selectSubjects" resultType="Map">
+         SELECT
+            SUBJECT_CODE,
+            SUBJECT_NAME
+        FROM SUBJECT
+        WHERE LENGTH(TRIM(SUBJECT_CODE)) > 0 AND LENGTH(TRIM(SUBJECT_NAME)) > 0
+        ORDER BY SUBJECT_NAME ASC
+    </select>
+
+    <select id="selectClassroomNames" resultType="string">
+        SELECT DISTINCT LR_NAME
+		FROM LECTURE_ROOM 
+    </select>
+
+
+	<update id="updateLecutre" parameterType="LectureReqVO">
+		UPDATE LECTURE_REQ
+		SET
+			LEC_NAME = #{lecName},
+			SUBJECT_CODE = #{subjectCode},
+			LEC_CATEGORY = #{lecCategory},
+			PRE_DAY = #{preDay},
+			PRE_TIME = #{preTime},
+			MAX_CAPACITY = #{maxCapacity},
+			PRE_CLASSRM = #{preClassrm}
+			<if test="fileRefNo != null and fileRefNo != ''">
+	            , FILE_REF_NO = #{fileRefNo} 
+	        </if>
+		WHERE
+			REQ_NO = #{reqNo}
+	</update>
+
+	
+	<update id="deleteLecutre">
+		UPDATE LECTURE_REQ
+		SET
+			STATUS = '취소'
+		WHERE
+			REQ_NO = #{reqNo}
+	</update>
+	
+	<select id="selectSubjectListByProfNo" resultMap="ProfessorApprovedLectureMap">
+		SELECT 
+	        L.LEC_NO,
+	        LR.LEC_NAME AS LR_LEC_NAME,
+	        L.REQ_NO AS REQ_NO,
+	        L.CURRENT_ENROLLMENT,
+	        L.LEC_STATUS,
+	        L.LR_NO,
+	        L.USER_NO,
+	        S.SUBJECT_CODE,
+	        S.DEPARTMENT_NO,
+	        S.GRADE_LEVEL,
+	        S.SUBJECT_NAME,
+	        S.CREDIT,
+	        S.SUBJECT_DESP,
+	        S.SEMESTER_NO
+	    FROM LECTURE L
+	    JOIN LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO
+	    JOIN SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE
+	    WHERE L.USER_NO = #{profNo}
+	      AND L.LEC_STATUS = 'OPEN'
+	    ORDER BY L.LEC_NO
+	</select>
+	
+	
+	<select id="selectLectureListByPaging" resultMap="ProfessorLectureMap">
+	     SELECT
+	        LR.REQ_NO,
+	        LR.SUBJECT_CODE,
+	        LR.LEC_NAME,
+	        U.USER_NAME,
+	        S.SUBJECT_NAME,
+	        LR.REQ_DATE,
+	        LR.STATUS,
+	        LR.REJ_REASON,
+	        L.LEC_NO
+	    FROM
+	        LECTURE_REQ LR
+	    JOIN
+	        SUBJECT S ON LR.SUBJECT_CODE = S.SUBJECT_CODE
+	    JOIN
+	        PROFESSOR P ON LR.USER_NO = P.USER_NO
+	    JOIN
+	        TB_USER U ON P.USER_NO = U.USER_NO
+	    JOIN
+            LECTURE L ON LR.REQ_NO = L.REQ_NO
+	    LEFT JOIN
+	        FILE_REF F ON LR.FILE_REF_NO = F.FILE_REF_NO
+	    WHERE
+	        LR.USER_NO = #{userNo}
+	    ORDER BY
+	        LR.REQ_NO DESC
+	    OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+	</select>
+	
+	<select id="selectTotalLectureCntByPaging" resultType="int">
+	    SELECT
+	        COUNT(*)
+	    FROM
+	        LECTURE_REQ
+	    WHERE
+	        USER_NO = #{userNo}
+	</select>
+
+</mapper>

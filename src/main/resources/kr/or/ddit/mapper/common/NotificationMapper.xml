@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.common.mapper.NotificationMapper">
+	<select id="selectUnreadByUser">
+		SELECT NOTI_NO
+			   , USER_NO
+			   , MESSAGE
+			   , LINK_URL
+			   , ICON_CLASS
+			   , FA_ICON
+			   , TIME_AGO
+			   , IS_READ
+			   , CREATED_AT 
+		  FROM NOTIFICATION
+		 WHERE USER_NO = #{userNo}
+		   AND IS_READ = 'N'
+	  ORDER BY CREATED_AT DESC
+	</select>
+	
+	<insert id="insertNotification">
+		INSERT INTO NOTIFICATION (
+			NOTI_NO
+			, USER_NO
+			, MESSAGE
+			, LINK_URL
+			, ICON_CLASS
+			, FA_ICON
+			, TIME_AGO
+		)
+		VALUES (
+			#{notiNo}
+			, #{userNo}
+			, #{message}
+			, #{linkUrl}
+			, #{iconClass}
+			, #{faIcon}
+			, #{timeAgo}
+		)
+	</insert>
+	
+	<update id="markAsRead">
+		UPDATE NOTIFICATION
+		   SET IS_READ='Y'
+		 WHERE NOTI_NO=#{notiNo}
+	</update>
+</mapper>

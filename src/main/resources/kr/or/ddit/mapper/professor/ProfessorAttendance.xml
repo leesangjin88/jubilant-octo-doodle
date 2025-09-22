@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+ * << 개정이력(Modification Information) >>
+ * 수정일		수정자		수정 내용
+ * ======================================
+ * 250716   김태수        최초 생성
+
+ -->
+
+
+<mapper namespace="kr.or.ddit.pfcp.professor.attendance.mapper.ProfessorAttenanceMapper">
+
+
+	<insert id="insertAttendances" parameterType="java.util.List">
+	    INSERT INTO ATTENDANCE (ATTEND_ID, ENROLL_NO, ATTEND_STATUS, MEMO , WEEK)
+	    VALUES
+	    <foreach collection="attendanceList" item="attendance" separator=",">
+	        (
+	            CONCAT('ATT', LPAD(ATTEND_ID_SEQ.NEXTVAL, 3, '0')),
+	            #{attendance.enrollNo},           
+	            #{attendance.attendStatus},
+	            #{attendance.memo},
+	            #{attendance.week}
+	        )
+	    </foreach>
+	</insert>
+	
+	<select id="selectUser" parameterType="string" resultType="kr.or.ddit.pfcp.common.vo.UserVO">
+        SELECT USER_NO, USER_NAME FROM TB_USER WHERE USER_NO = #{userNo}
+    </select>
+
+    <select id="selectEnrNo" parameterType="string" resultType="kr.or.ddit.pfcp.common.vo.LectureEnrVO">
+        SELECT ENROLL_NO, LEC_NO, USER_NO FROM LECTURE_ENR WHERE ENROLL_NO = #{enrNo}
+    </select>
+
+    <select id="selectLecNo" parameterType="string" resultType="kr.or.ddit.pfcp.common.vo.LectureReqVO">
+        SELECT
+            LR.LEC_NAME,
+            L.LEC_NO 
+        FROM
+            LECTURE L
+        INNER JOIN
+            LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO
+        WHERE
+            L.LEC_NO = #{lecNo}
+    </select>
+	
+</mapper>

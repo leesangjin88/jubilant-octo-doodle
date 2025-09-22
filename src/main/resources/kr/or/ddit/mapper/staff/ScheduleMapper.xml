@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.pfcp.staff.schedule.mapper.ScheduleMapper">
+	<!-- ResultMap - 조인된 Schedule + Ref 매핑 -->
+	<resultMap id="scheduleMap"
+		type="kr.or.ddit.pfcp.common.vo.ScheduleVO">
+		<id property="scheduleNo" column="SCHEDULE_NO" />
+		<result property="scheduleTitle" column="SCHEDULE_TITLE" />
+		<result property="startDate" column="START_DATE" />
+		<result property="endDate" column="END_DATE" />
+		<result property="startTime" column="START_TIME" />
+		<result property="endTime" column="END_TIME" />
+		<result property="scheduleDesp" column="SCHEDULE_DESP" />
+		<result property="lecNo" column="LEC_NO" />
+		<result property="scheduleTargetId" column="SCHEDULE_TARGET_ID" />
+
+		<association property="type"
+			javaType="kr.or.ddit.pfcp.common.vo.ScheduleTypeVO">
+			<id property="scheduleTypeNo" column="SCHEDULE_TYPE_NO" />
+			<result property="scheduleTypeName"
+				column="SCHEDULE_TYPE_NAME" />
+			<result property="scheduleGroup" column="SCHEDULE_GROUP" />
+			<result property="description" column="DESCRIPTION" />
+		</association>
+	</resultMap>
+
+
+	<!-- 일정 + 참조 조인 조회 -->
+	<select id="selectScheduleListWithType" resultMap="scheduleMap">
+		SELECT
+		S.SCHEDULE_NO,
+		S.SCHEDULE_TITLE,
+		S.START_DATE,
+		S.END_DATE,
+		S.START_TIME,
+		S.END_TIME,
+		S.SCHEDULE_DESP,
+		S.SCHEDULE_TARGET_ID,
+		T.SCHEDULE_TYPE_NO,
+		T.SCHEDULE_TYPE_NAME,
+		T.SCHEDULE_GROUP
+		FROM SCHEDULE
+		S
+		JOIN
+		SCHEDULE_TYPE T ON S.SCHEDULE_TYPE_NO = T.SCHEDULE_TYPE_NO
+		<where>
+			 S.IS_ACTIVE = 'Y'
+			<if test="scheduleTypeNo != null and scheduleTypeNo != ''">
+				AND S.SCHEDULE_TYPE_NO = #{scheduleTypeNo}
+			</if>
+			<if test="startDate != null and startDate != ''">
+				AND TO_DATE(S.START_DATE, 'YYYY-MM-DD') &gt;= TO_DATE(#{startDate},
+				'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND TO_DATE(S.END_DATE, 'YYYY-MM-DD') &lt;= TO_DATE(#{endDate},
+				'YYYY-MM-DD')
+			</if>
+
+		</where>
+	</select>
+
+
+	<!-- SCHEDULE 등록 -->
+	<insert id="insertSchedule"
+		parameterType="kr.or.ddit.pfcp.common.vo.ScheduleVO">
+		<selectKey keyProperty="scheduleNo" resultType="String"
+			order="BEFORE">
+			SELECT TO_CHAR(SEQ_SCHEDULE_NO.NEXTVAL) FROM DUAL
+		</selectKey>
+
+		INSERT INTO SCHEDULE (
+		SCHEDULE_NO
+		, SCHEDULE_TITLE
+		, SCHEDULE_TYPE_NO
+		, START_DATE
+		, END_DATE
+		, START_TIME
+		, END_TIME
+		, SCHEDULE_DESP
+		, LEC_NO
+		, SCHEDULE_TARGET_ID
+		, IS_NOTICE
+		) VALUES (
+		#{scheduleNo}
+		, #{scheduleTitle}
+		, #{type.scheduleTypeNo}
+		, #{startDate}
+		, #{endDate}
+		, #{startTime}
+		, #{endTime}
+		, #{scheduleDesp}
+		, #{lecNo}
+		, #{scheduleTargetId}
+		, #{isNotice}
+		)
+
+	</insert>
+
+
+
+	<!-- 일정 수정 -->
+	<update id="updateSchedule"
+		parameterType="kr.or.ddit.pfcp.common.vo.ScheduleVO">
+		UPDATE SCHEDULE
+		SET
+			SCHEDULE_TITLE = #{scheduleTitle}
+			, SCHEDULE_TYPE_NO = #{type.scheduleTypeNo}
+			, START_DATE = #{startDate}
+			, END_DATE = #{endDate}
+			, START_TIME = #{startTime}
+			, END_TIME = #{endTime}
+			, SCHEDULE_DESP = #{scheduleDesp}
+			, LEC_NO = #{lecNo}
+			, SCHEDULE_TARGET_ID = #{scheduleTargetId}
+			, IS_NOTICE = #{isNotice}
+		WHERE
+			SCHEDULE_NO = #{scheduleNo}
+	</update>
+
+
+	<!-- 일정 삭제 -->
+	<delete id="deleteSchedule">
+		UPDATE SCHEDULE
+    	SET IS_ACTIVE = 'N'
+   		WHERE SCHEDULE_NO = #{scheduleNo}
+	</delete>
+
+	<!-- 일정 조회 개수 -->
+	<select id="selectScheduleCount" parameterType="String">
+		SELECT COUNT(*)
+		FROM SCHEDULE
+		WHERE SCHEDULE_NO = #{scheduleNo}
+	</select>
+
+	<select id="selectSchedule" resultMap="scheduleMap">
+		SELECT
+		S.SCHEDULE_NO,
+		S.SCHEDULE_TITLE,
+		S.START_DATE,
+		S.END_DATE,
+		S.START_TIME,
+		S.END_TIME,
+		S.SCHEDULE_DESP,
+		S.SCHEDULE_TARGET_ID,
+		S.LEC_NO,
+		ST.SCHEDULE_TYPE_NO,
+		ST.SCHEDULE_TYPE_NAME,
+		ST.SCHEDULE_GROUP
+		FROM SCHEDULE S
+		JOIN
+		SCHEDULE_TYPE ST ON S.SCHEDULE_TYPE_NO = ST.SCHEDULE_TYPE_NO
+		WHERE
+		S.SCHEDULE_NO = #{scheduleNo}
+
+	</select>
+
+	<select id="selectScheduleTypeList"
+		resultType="kr.or.ddit.pfcp.common.vo.ScheduleTypeVO">
+		SELECT
+		SCHEDULE_TYPE_NO,
+		SCHEDULE_TYPE_NAME,
+		SCHEDULE_GROUP
+		FROM
+		SCHEDULE_TYPE
+		ORDER BY SCHEDULE_TYPE_NO
+	</select>
+
+	<select id="selectScheduleTypes"
+		resultType="kr.or.ddit.pfcp.common.vo.ScheduleTypeVO">
+		SELECT
+		SCHEDULE_TYPE_NO,
+		SCHEDULE_TYPE_NAME
+		FROM
+		SCHEDULE_TYPE
+		WHERE
+		SCHEDULE_GROUP = #{schedule_group}
+		ORDER BY
+		SCHEDULE_TYPE_NO
+	</select>
+
+
+</mapper>

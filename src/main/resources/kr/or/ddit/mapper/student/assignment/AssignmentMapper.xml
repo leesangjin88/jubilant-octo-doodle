@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.pfcp.student.eclass.assignement.mapper.AssignmentMapper">
+	
+	<select id="selectAssignmentList">
+	 SELECT
+		ASSIGN_NO
+		,LEC_NO
+		,ASSIGN_TITLE
+		,ASSIGN_DEADLINE
+		,ASSIGN_DESP
+		,FILE_REF_NO
+	  FROM ASSIGNMENT
+	 WHERE LEC_NO=#{lecNo}
+	</select>
+	
+	<insert id="insertAssignment">
+		INSERT INTO ASSIGNMENT (
+							ASSIGN_NO, 
+							LEC_NO, 
+							ASSIGN_TITLE, 
+							ASSIGN_DEADLINE, 
+							ASSIGN_DESP, 
+							FILE_REF_NO)
+						VALUES (
+						    'ASG' || LPAD(assign_seq.NEXTVAL, 3, '0'),
+						    #{lecNo},
+						    #{assignTitle},
+						    #{assignDeadline},
+						    #{assignDesp},
+						    #{fileRefNo}
+						)
+	</insert>
+	
+</mapper>

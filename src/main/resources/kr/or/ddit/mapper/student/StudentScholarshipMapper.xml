@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.student.bill.scholarship.mapper.StudentScholarshipMapper">
+	<resultMap id="scholarshipMap" type="kr.or.ddit.pfcp.common.vo.ScholarshipVO">
+	    <id property="scholarshipNo" column="SCHOLARSHIP_NO"/>
+	    <result property="rnum" column="RNUM"/>
+	    <result property="userNo" column="USER_NO"/>
+	    <result property="schTypeNo" column="SCH_TYPE_NO"/>
+	    <result property="tuitionAmount" column="TUITION_AMOUNT"/>
+	    <result property="disAmount" column="DIS_AMOUNT"/>
+	    <result property="applyDate" column="APPLY_DATE"/>
+
+	    <association property="scholarshipType" javaType="kr.or.ddit.pfcp.common.vo.ScholarshipTypeVO" autoMapping="true">
+	        <id property="schTypeNo" column="SCH_TYPE_NO"/>
+	        <result property="schName" column="SCH_NAME"/>
+	        <result property="rate" column="RATE"/>
+	        <result property="schDesc" column="SCH_DESC"/>
+	        <result property="schActive" column="SCH_ACTIVE"/>
+	    </association>
+	</resultMap>
+
+	<resultMap id="scholarshipApplyMap" type="kr.or.ddit.pfcp.common.vo.ScholarshipApplyVO">
+	    <id property="applyNo" column="APPLY_NO"/>
+	    <result property="userNo" column="USER_NO"/>
+	    <result property="schTypeNo" column="SCH_TYPE_NO"/>
+	    <result property="requestDate" column="REQUEST_DATE"/>
+	    <result property="applyDate" column="APPLY_DATE"/>
+	    <result property="applyStatus" column="APPLY_STATUS"/>
+	    <result property="approveDate" column="APPROVE_DATE"/>
+	    <result property="requestComment" column="REQUEST_COMMENT"/>
+	    <result property="fileRefNo" column="FILE_REF_NO"/>
+	    <result property="applyComment" column="APPLY_COMMENT"/>
+	
+	    <association property="scholarshipType" javaType="kr.or.ddit.pfcp.common.vo.ScholarshipTypeVO">
+	        <id property="schTypeNo" column="SCH_TYPE_NO"/>
+	        <result property="schName" column="SCH_NAME"/>
+	    </association>
+	</resultMap>
+	
+	<select id="selectScholarshipTypeList" resultType="kr.or.ddit.pfcp.common.vo.ScholarshipTypeVO">
+		SELECT SCH_TYPE_NO
+	           , SCH_NAME
+	           , RATE
+	           , SCH_DESC
+	           , SCH_ACTIVE
+	           , SCH_FILE_REF_NO
+      FROM SCHOLARSHIP_TYPE 
+	</select>
+
+	<select id="selectScholarshipBenefitList" resultMap="scholarshipMap">
+		SELECT A.SCHOLARSHIP_NO
+			   , A.USER_NO
+			   , A.SCH_TYPE_NO
+			   , A.TUITION_AMOUNT
+			   , A.DIS_AMOUNT
+			   , SUBSTR(A.APPLY_DATE, 1, 10) AS APPLY_DATE
+			   , B.SCH_TYPE_NO AS SCH_TYPE_NO
+			   , B.SCH_NAME
+			   , B.RATE
+			   , B.SCH_DESC
+			   , B.SCH_ACTIVE
+  		  FROM SCHOLARSHIP A
+	INNER JOIN SCHOLARSHIP_TYPE B ON A.SCH_TYPE_NO = B.SCH_TYPE_NO
+ 		 WHERE A.USER_NO = #{userNo}
+ 	  ORDER BY APPLY_DATE DESC
+	</select>
+	
+	<select id="selectScholarshipApplyList" resultMap="scholarshipApplyMap">
+		SELECT APPLY_NO
+		       , USER_NO
+		       , SCH_TYPE_NO
+		       , SCH_NAME
+		       , REQUEST_DATE
+		       , APPLY_DATE
+		       , APPLY_STATUS
+		       , APPROVE_DATE
+		       , REQUEST_COMMENT
+		       , FILE_REF_NO
+		       , APPLY_COMMENT
+          FROM SCHOLARSHIP_APPLY
+  NATURAL JOIN SCHOLARSHIP_TYPE
+     	 WHERE USER_NO=#{userNo}
+     	   AND APPLY_STATUS='대기중'
+      ORDER BY REQUEST_DATE DESC
+	</select>
+	
+	<update id="deleteScholarshipApply">
+		UPDATE SCHOLARSHIP_APPLY
+		   SET APPLY_STATUS='삭제됨'
+		 WHERE APPLY_NO=#{applyNo}
+	</update>
+
+	<insert id="insertScholarshipApply">
+		INSERT INTO SCHOLARSHIP_APPLY (
+			APPLY_NO
+			, USER_NO
+			, SCH_TYPE_NO
+			, REQUEST_DATE
+			, APPLY_DATE
+			, APPLY_STATUS
+			, APPROVE_DATE
+			, REQUEST_COMMENT
+			, FILE_REF_NO
+			, APPLY_COMMENT
+		)
+		VALUES (
+			'SA' || LPAD(SEQ_SCHOLARSHIP_APPLY_NO.NEXTVAL, 8, '0')
+			, #{userNo}
+			, #{schTypeNo}
+			, TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+			, '-'
+			, '대기중'
+			, '-'
+			, #{requestComment}
+			, #{fileRefNo}
+			, #{applyComment}
+		)
+	</insert>
+	
+	<select id="selectScholarshipApply" resultMap="scholarshipApplyMap">
+		SELECT APPLY_NO
+		       , USER_NO
+		       , SCH_TYPE_NO
+		       , SCH_NAME
+		       , REQUEST_DATE
+		       , APPLY_DATE
+		       , APPLY_STATUS
+		       , APPROVE_DATE
+		       , REQUEST_COMMENT
+		       , FILE_REF_NO
+		       , APPLY_COMMENT
+	      FROM SCHOLARSHIP_APPLY
+  NATURAL JOIN SCHOLARSHIP_TYPE
+	     WHERE APPLY_NO=#{applyNo}
+	</select>
+	
+	<update id="updateScholarshipApply">
+		UPDATE SCHOLARSHIP_APPLY
+		   SET SCH_TYPE_NO=#{schTypeNo}
+		       , REQUEST_COMMENT=#{requestComment}
+		       <if test="fileRefNo != null and fileRefNo != ''">
+		       , FILE_REF_NO=#{fileRefNo}
+		       </if>
+		 WHERE APPLY_NO=#{applyNo}
+	</update>
+</mapper>

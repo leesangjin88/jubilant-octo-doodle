@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.pfcp.student.facility.mapper.FacilityReservationMapper">
+	<insert id="insertFacilityReservation" parameterType="FacilityReservationVO">
+        <selectKey keyProperty="reservationNo" resultType="String" order="BEFORE">
+            SELECT 'RES' || LPAD(NVL(MAX(TO_NUMBER(SUBSTR(RESERVATION_NO, 4))), 0) + 1, 6, '0') AS NEXT_NO
+            FROM FACILITY_RESERVATION
+            WHERE RESERVATION_NO LIKE 'RES%'
+        </selectKey>
+        INSERT INTO FACILITY_RESERVATION (
+            RESERVATION_NO,
+            FACILITY_NO,
+            USER_NO,
+            PREFERRED_DATE
+        ) VALUES (
+            #{reservationNo},
+            #{facilityNo},
+            #{userNo},
+            #{preferredDate}
+        )
+    </insert>
+	
+	<update id="cancelFacilityReservation" parameterType="String">
+	    UPDATE FACILITY SET FACILITY_STATUS = #{facilityStatus} WHERE FACILITY_NO = #{facilityNo}
+	</update>
+	
+	<select id="getAvailableFacilities" resultType="FacilityVO">
+        SELECT 
+            FACILITY_NO,
+            FACILITY_NAME,
+            FACILITY_TYPE,
+            LOCATION,
+            FACILITY_MP,
+            FACILITY_STATUS
+        FROM FACILITY
+        WHERE FACILITY_STATUS = 'available'
+        ORDER BY FACILITY_NAME
+    </select>
+    
+    <select id="getFacilityByNo" parameterType="String" resultType="FacilityVO">
+        SELECT 
+            FACILITY_NO,
+            FACILITY_NAME,
+            FACILITY_TYPE,
+            LOCATION,
+            FACILITY_MP,
+            FACILITY_STATUS
+        FROM FACILITY
+        WHERE FACILITY_NO = #{facilityNo}
+        AND FACILITY_STATUS = 'available'
+    </select>
+</mapper>

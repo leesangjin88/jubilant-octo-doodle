@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.common.mapper.FileRefMapper">
+
+
+<resultMap id="fileRefMap" type="kr.or.ddit.pfcp.common.vo.FileRefVO">
+    <result property="fileRefNo" column="FILE_REF_NO" />
+    <result property="fileRefType" column="FILE_REF_TYPE" />
+    <result property="fileRefTargetId" column="FILE_REF_TARGET_ID" />
+    <result property="atchId" column="ATCH_ID" />
+</resultMap>
+
+
+	<insert id="insertFileRef" parameterType="kr.or.ddit.pfcp.common.vo.FileRefVO">
+		INSERT INTO FILE_REF (
+	        FILE_REF_NO,
+	        FILE_REF_TYPE,
+	        FILE_REF_TARGET_ID,
+	        ATCH_ID
+	    ) VALUES (
+	        #{fileRefNo},
+	        #{fileRefType},
+	        #{fileRefTargetId},
+	        #{atchId}
+	    )
+	</insert>
+
+	<select id="selectFileRef">
+		SELECT FILE_REF_NO
+			   , FILE_REF_TYPE
+			   , FILE_REF_TARGET_ID
+			   , ATCH_ID
+		  FROM FILE_REF
+		 WHERE FILE_REF_NO=#{fileRefNo}
+	</select>
+	
+	<delete id="deleteFileRef">
+		DELETE FROM FILE_REF
+		 WHERE FILE_REF_NO=#{fileRefNo}
+	</delete>
+	
+	<select id="selectProfileImgByUserNo" resultMap="fileRefMap">
+	    SELECT FILE_REF_NO,
+	           FILE_REF_TYPE,
+	           FILE_REF_TARGET_ID,
+	           ATCH_ID
+	      FROM FILE_REF
+	     WHERE FILE_REF_TARGET_ID = #{userNo}
+	       AND FILE_REF_TYPE = 'PROF_IMG'
+	</select>
+	
+		 
+</mapper>

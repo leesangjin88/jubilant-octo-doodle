@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * << 개정이력(Modification Information) >> 
+ * 수정일 	수정자 	수정 내용 
+ * ====================================== 
+ * 250703 	김규민 	최초 생성 
+ * 250704  	김규민 	수정 
+ * 250705   김규민 	수정 
+ * 250709   김규민    수정
+ * 250715   김규민    수정
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.college.mapper.DepartmentMapper">
+	
+	<resultMap id="departmentWithGradesMap" type="kr.or.ddit.pfcp.common.vo.DepartmentVO">
+        <id property="departmentNo" column="DEPARTMENT_NO"/>
+        <result property="departmentName" column="DEPARTMENT_NAME"/>
+        <result property="departmentTuition" column="DEPARTMENT_TUITION"/>
+        <result property="collegeNo" column="COLLEGE_NO"/>
+        
+        <association property="dgrReqVO" javaType="kr.or.ddit.pfcp.common.vo.DGRRequestVO">
+            <id property="dgrNo" column="DGR_NO"/> 
+            <result property="dgrGrade" column="DGR_GRADE"/>
+            <result property="dgrMc" column="DGR_MC"/>
+            <result property="dgrLac" column="DGR_LAC"/>
+            <result property="dgrFcc" column="DGR_FCC"/>
+            <result property="dgrDate" column="DGR_DATE"/>
+            <result property="dgrVolunteerHour" column="DGR_VOLUNTEER_HOUR"/>
+        </association>
+        
+        <association property="curriculumVO" javaType="kr.or.ddit.pfcp.common.vo.CurriculumVO">
+            <id property="curNo" column="CUR_NO"/> 
+            <result property="departmentNo" column="DEPARTMENT_NO"/>
+            <result property="subjectCode" column="SUBJECT_CODE"/>
+            <result property="reqCode" column="REQ_CODE"/>
+        </association>
+        
+    </resultMap>
+    
+	<select id="selectAllDepartmentList">
+		SELECT
+			DEPARTMENT_NO
+			, DEPARTMENT_NAME
+			, DEPARTMENT_TUITION
+			, COLLEGE_NO
+			, DEPARTMENT_DESC
+		FROM DEPARTMENT
+		WHERE COLLEGE_NO = #{collegeNo}
+		AND DEL_YN = 'N'
+	</select>
+
+	<select id="selectDepartment" resultType="DepartmentVO" parameterType="String">
+		SELECT
+			DEPARTMENT_NO
+			, DEPARTMENT_NAME
+			, DEPARTMENT_TUITION
+			, COLLEGE_NO
+			, DEPARTMENT_DESC
+		FROM DEPARTMENT
+		WHERE DEPARTMENT_NO = #{departmentNo}
+		AND DEL_YN = 'N'
+	</select>
+
+	<select id="selectDGRRequest" resultMap="departmentWithGradesMap">
+		SELECT
+			D.DEPARTMENT_NO
+			, D.DEPARTMENT_NAME
+			, D.DEPARTMENT_TUITION
+			, D.COLLEGE_NO
+			, DR.DGR_NO
+			, DR.DGR_GRADE
+			, DR.DGR_MC
+			, DR.DGR_LAC
+			, DR.DGR_FCC
+			, DR.DGR_DATE
+			, DR.DGR_VOLUNTEER_HOUR
+		FROM DEPARTMENT D
+		JOIN DGR_REQ DR ON D.DGR_NO = DR.DGR_NO
+		WHERE D.DEPARTMENT_NO = #{departmentNo}
+	</select>
+	
+	<insert id="insertDepartment">
+		INSERT INTO DEPARTMENT (
+			DEPARTMENT_NO
+			,DEPARTMENT_NAME
+			,DEPARTMENT_TUITION
+			,DGR_NO
+			,COLLEGE_NO
+			,DEPARTMENT_DESC
+			,DEL_YN
+		) VALUES (
+			'DP' || LPAD(SEQ_DEPARTMENT.NEXTVAL, 3, '0')
+			,#{departmentName}
+		 	,#{departmentTuition}
+		 	,#{dgrNo}
+			,#{collegeNo}
+			,#{departmentDesc}
+			,'N'
+		)
+	</insert>
+
+	<select id="selectCollege" resultType="CollegeVO">
+		SELECT
+			COLLEGE_NO
+			, COLLEGE_NAME
+		FROM COLLEGE
+	</select>
+
+	<!-- 삭제 상태로 변경 -->
+	<update id="updateDepartmentDelYN" parameterType="String">
+		UPDATE DEPARTMENT
+		SET DEL_YN = 'Y'
+		WHERE DEPARTMENT_NO = #{departmentNo}
+	</update>
+
+</mapper>

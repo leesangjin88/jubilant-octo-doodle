@@ -1,0 +1,625 @@
+@charset "UTF-8";
+
+
+/* ==========================================================================
+   표준 UI 스타일시트 (Standard UI Stylesheet)
+   ========================================================================== */
+
+/* 기본 리셋 및 베이스 스타일 */
+* {
+    box-sizing: border-box;
+}
+
+
+/* 목록 상단 공통 박스 */
+/* 상단 정보 박스 */
+.sectionHeaderLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0; /* 연한 회색 밑줄 */
+}
+
+.sectionHeaderTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.sectionHeaderDescription {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+/* 다운로드 버튼 */
+.attachment-section {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    display: flex; /* 버튼들이 가로로 정렬되도록 */
+    flex-wrap: wrap; /* 공간 부족 시 다음 줄로 넘어가도록 */
+    gap: 10px; /* 버튼 사이 간격 */
+    align-items: center; /* 세로 중앙 정렬 */
+}
+
+.attachment-label {
+    font-weight: bold;
+    color: #333;
+    margin-right: 15px;
+    white-space: nowrap; /* 줄 바꿈 방지 */
+}
+
+/* 다운로드 버튼 스타일 */
+.download-button {
+    display: inline-flex; /* 아이콘과 텍스트를 한 줄에 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 8px; /* 아이콘과 텍스트 사이 간격 */
+    padding: 8px 15px;
+    background-color: #4CAF50; /* 버튼 배경색 (진한 초록) */
+    color: white; /* 글자색 */
+    border: none;
+    border-radius: 5px; /* 모서리 둥글게 */
+    text-decoration: none; /* 밑줄 제거 */
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease; /* 호버 및 클릭 애니메이션 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+}
+
+.download-button:hover {
+    background-color: #45a049; /* 호버 시 배경색 변경 */
+    transform: translateY(-1px); /* 살짝 위로 뜨는 효과 */
+}
+
+.download-button:active {
+    background-color: #367c39; /* 클릭 시 배경색 변경 */
+    transform: translateY(0); /* 다시 제자리로 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); /* 그림자 약하게 */
+}
+
+/* 아이콘 스타일 (Font Awesome 사용 시) */
+.download-button i {
+    font-size: 16px; /* 아이콘 크기 */
+}
+
+
+
+/* 저장 버튼 */
+.saveButton {
+  padding: 0.5rem 1rem;
+  background-color: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+.saveButton:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+.saveButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 등록 버튼 - 메인 액션 (녹색 계열) */
+.submitButton {
+  padding: 0.5rem 1rem;
+  background-color: #10b981;
+  color: #ffffff;
+  border: 1px solid #10b981;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.submitButton:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+.submitButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+}
+
+/* 삭제 버튼 */
+.deleteButton {
+  padding: 0.5rem 1rem;
+  background-color: #ef4444;
+  color: #ffffff;
+  border: 1px solid #ef4444;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+.deleteButton:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+}
+.deleteButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+}
+
+/* 수정 버튼 */
+.editButton {
+  padding: 0.5rem 1rem;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: 1px solid #3b82f6;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+.editButton:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+.editButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* 취소 버튼 */
+.cancelButton {
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+.cancelButton:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+.cancelButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2);
+}
+
+/* 필터 버튼 */
+.filterButton {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background-color: #ffffff;
+  color: #64748b;
+  transition: all 0.2s;
+}
+.filterButton:hover {
+  background-color: #f8fafc;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+.filterButton.active {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+/* 검색 버튼 (파란색 계열) */
+.searchButton {
+  padding: 0.5rem 1rem;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: 1px solid #3b82f6;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+.searchButton:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+/* 테이블 컨테이너 */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 */
+.defaultTable {
+  width: 100%;
+  font-size: 0.875rem;
+  text-align: left;
+  color: #475569;
+  border-collapse: collapse;
+}
+
+/* 테이블 헤더 */
+.tableHead {
+  background-color: #f8fafc;
+  color: #334155;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* 테이블 셀 (헤더용) */
+.tableTh {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* 테이블 셀 (내용용) */
+.tableTd {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: center;
+  color: #475569;
+}
+
+/* 테이블 행 hover */
+.tableRowHover:hover {
+  background-color: #f8fafc;
+}
+
+/* 테이블 행 스트라이프 */
+.tableRowStripe:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* select box */
+.selectBox {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  width: 100%;
+  color: #475569;
+  background-color: #ffffff;
+  font-size: 1.0rem;
+}
+
+.selectBox:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 탭 컨테이너 */
+.tabContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+  background-color: #f8fafc;
+  padding: 0.25rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+/* 개별 탭 */
+.tabButton {
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  color: #64748b;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+.tabButton:hover {
+  color: #3b82f6;
+  background-color: #ffffff;
+}
+.tabButton:focus {
+  outline: none;
+}
+
+/* 활성 탭 */
+.tabButtonActive {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background-color: #ffffff;
+  font-weight: 600;
+}
+
+/* 입력 필드 */
+.inputField {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  font-size: 1.0rem;
+  color: #475569;
+  background-color: #ffffff;
+}
+.inputField:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 텍스트 에어리어 */
+.textareaField {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  resize: vertical;
+  min-height: 80px;
+  font-size: 1.0rem;
+  color: #475569;
+}
+.textareaField:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 라벨 */
+.inputLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+/* 검색바 */
+.searchBar {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: #475569;
+}
+.searchBar:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 체크박스 */
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  color: #3b82f6;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+}
+.checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 라디오버튼 */
+/* 라디오 버튼 */
+.radioButton {
+  position: relative;
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  background-color: #ffffff;
+  transition: all 0.2s;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.radioButton:before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: #3b82f6;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.radioButton:hover {
+  border-color: #3b82f6;
+}
+
+.radioButton:checked:before {
+  opacity: 1;
+}
+
+/* 라디오 버튼 라벨 */
+.radioButtonLabel {
+  font-size: 0.875rem;
+  color: #334155;
+  margin-left: 0.75rem;
+  cursor: pointer;
+}
+
+.radioButtonLabel:hover {
+  color: #3b82f6;
+}
+
+/* 라디오 버튼 포커스 */
+.radioButton:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+
+/* 알림박스 공통 */
+.noticeBox {
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  border: 1px solid;
+  margin-bottom: 1rem;
+}
+
+/* 정보 */
+.noticeInfo {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+/* 경고 */
+.noticeWarning {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+/* 에러 */
+.noticeError {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+/* 성공 */
+.noticeSuccess {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+/* 카드 */
+.card {
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+/* 제목 */
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 1rem;
+}
+
+/* 페이지네이션 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.pageButton {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background-color: #ffffff;
+  color: #64748b;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.pageButton:hover {
+  background-color: #f8fafc;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.pageButton.active {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+/* 배지/태그 */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badgeBlue {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badgeGreen {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badgeYellow {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badgeRed {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.badgeGray {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+/* 툴팁 */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltipText {
+  visibility: hidden;
+  width: 120px;
+  background-color: #1e293b;
+  color: #ffffff;
+  text-align: center;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  font-size: 0.75rem;
+}
+
+.tooltip:hover .tooltipText {
+  visibility: visible;
+}
+
+/* 로딩 스피너 */
+.spinner {
+  border: 2px solid #f1f5f9;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

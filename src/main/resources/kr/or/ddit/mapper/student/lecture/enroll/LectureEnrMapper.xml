@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+   namespace="kr.or.ddit.pfcp.student.lecture.enroll.mapper.LectureEnrMapper">
+   <resultMap id="lectureEnrResultMap"
+      type="kr.or.ddit.pfcp.common.vo.LectureEnrVO">
+      <id property="enrollNo" column="ENROLL_NO" />
+      <result property="lecNo" column="LEC_NO" />
+      <result property="userNo" column="USER_NO" />
+      <result property="enrollTime" column="ENROLL_TIME" />
+      <result property="enrollStatus" column="ENROLL_STATUS" />
+      <result property="enrollType" column="ENROLL_TYPE" />
+      <result property="priority" column="PRIORITY" />
+      <result property="attendance" column="ATTENDANCE" />
+      <result property="evalYn" column="EVAL_YN" />
+      <result property="grade" column="GRADE" />
+      <result property="gradePoint" column="GRADE_POINT" />
+      <result property="semesterName" column="SEMESTER_NAME" />
+
+      <association property="subject"
+         javaType="kr.or.ddit.pfcp.common.vo.SubjectVO">
+         <id property="subjectCode" column="SUBJECT_CODE" />
+         <result property="departmentNo" column="DEPARTMENT_NO" />
+         <result property="gradeLevel" column="GRADE_LEVEL" />
+         <result property="subjectName" column="SUBJECT_NAME" />
+         <result property="credit" column="CREDIT" />
+         <result property="subjectDesp" column="SUBJECT_DESP" />
+         <result property="semesterNo" column="SEMESTER_NO" />
+      </association>
+      
+      <association property="lectureReq" javaType="kr.or.ddit.pfcp.common.vo.LectureReqVO">
+      	<result property="lecName" column="LEC_NAME" />
+      </association>
+   </resultMap>
+
+
+   <resultMap id="lectureResultMap"
+      type="kr.or.ddit.pfcp.common.vo.LectureVO">
+      <!-- LectureVO 필드 -->
+      <id property="lecNo" column="LEC_NO" />
+      <result property="reqNo" column="REQ_NO" />
+      <result property="userNo" column="USER_NO" />
+      <result property="currentEnrollment"
+         column="CURRENT_ENROLLMENT" />
+      <result property="lecStatus" column="LEC_STATUS" />
+      <result property="lrNo" column="LR_NO" />
+
+      <!-- LectureReqVO -->
+      <association property="lectureReq"
+         javaType="kr.or.ddit.pfcp.common.vo.LectureReqVO">
+         <id property="reqNo" column="REQ_NO" />
+         <result property="lecName" column="REQ_LEC_NAME" />
+         <result property="preDay" column="REQ_PRE_DAY" />
+         <result property="preTime" column="REQ_PRE_TIME" />
+         <result property="maxCapacity" column="REQ_MAX_CAPACITY" />
+      </association>
+
+      <association property="subject"
+         javaType="kr.or.ddit.pfcp.common.vo.SubjectVO">
+         <id property="subjectCode" column="SUBJECT_CODE" />
+         <result property="departmentNo" column="DEPARTMENT_NO" />
+         <result property="gradeLevel" column="GRADE_LEVEL" />
+         <result property="subjectName" column="SUBJECT_NAME" />
+         <result property="credit" column="CREDIT" />
+         <result property="subjectDesp" column="SUBJECT_DESP" />
+         <result property="semesterNo" column="SEMESTER_NO" />
+      </association>
+
+      <!-- UserVO -->
+      <association property="user"
+         javaType="kr.or.ddit.pfcp.common.vo.UserVO">
+         <id property="userNo" column="USER_USER_NO" />
+         <result property="userName" column="USER_USER_NAME" />
+      </association>
+   </resultMap>
+
+   <resultMap id="enrollListresultMap"
+      type="kr.or.ddit.pfcp.common.vo.LectureEnrVO">
+      <!-- 기본 수강신청 정보 -->
+      <id property="lecNo" column="LEC_NO" />
+      <result property="userNo" column="USER_NO" />
+      <result property="enrollTime" column="ENROLL_TIME" />
+      <result property="enrollStatus" column="ENROLL_STATUS" />
+
+      <!-- 조인된 추가 정보 -->
+      <result property="subjectName" column="SUBJECT_NAME" />
+      <result property="preDay" column="PRE_DAY" />
+      <result property="preTime" column="PRE_TIME" />
+      <result property="professorName" column="PROFESSOR_NAME" />
+      <result property="credit" column="CREDIT" />
+   </resultMap>
+
+   <resultMap id="lectureResultMapTime"
+      type="kr.or.ddit.pfcp.common.vo.LectureVO">
+      <id property="lecNo" column="LEC_NO" />
+      <result property="reqNo" column="REQ_NO" />
+      <result property="lrNo" column="LR_NO" />
+      <result property="lecStatus" column="LEC_STATUS" />
+      <result property="currentEnrollment"
+         column="CURRENT_ENROLLMENT" />
+
+      <association property="lectureReq"
+         javaType="kr.or.ddit.pfcp.common.vo.LectureReqVO">
+         <result property="preDay" column="REQ_PRE_DAY" />
+         <result property="preTime" column="REQ_PRE_TIME" />
+         <result property="maxCapacity" column="REQ_MAX_CAPACITY" />
+         <result property="lecName" column="REQ_LEC_NAME" />
+      </association>
+
+      <association property="subject"
+         javaType="kr.or.ddit.pfcp.common.vo.SubjectVO">
+         <id property="subjectCode" column="SUBJECT_CODE" />
+         <result property="subjectName" column="SUBJECT_NAME" />
+         <result property="credit" column="CREDIT" />
+      </association>
+
+      <association property="user"
+         javaType="kr.or.ddit.pfcp.common.vo.UserVO">
+         <id property="userNo" column="USER_USER_NO" />
+         <result property="userName" column="USER_USER_NAME" />
+      </association>
+   </resultMap>
+   <!--sh -->
+   <select id="selectLectureEnrollmentsByUserNo"
+      parameterType="string" resultMap="lectureEnrResultMap">
+      SELECT
+      e.ENROLL_NO,
+      e.LEC_NO,
+      e.USER_NO,
+      e.ENROLL_TIME,
+      e.ENROLL_STATUS,
+      e.ENROLL_TYPE,
+      e.PRIORITY,
+      e.ATTENDANCE,
+      e.EVAL_YN,
+      s.SUBJECT_CODE,
+      s.DEPARTMENT_NO,
+      s.GRADE_LEVEL,
+      s.SUBJECT_NAME,
+      s.CREDIT,
+      s.SUBJECT_DESP,
+      s.SEMESTER_NO,
+      r.LEC_NAME
+
+      FROM
+      LECTURE_ENR e
+      JOIN LECTURE l ON e.LEC_NO = l.LEC_NO
+      JOIN LECTURE_REQ r ON l.REQ_NO =
+      r.REQ_NO
+      JOIN SUBJECT s ON r.SUBJECT_CODE = s.SUBJECT_CODE
+      WHERE
+      e.USER_NO = #{userNo}
+   </select>
+
+   <!-- 현재 학기 -->
+   <select id="getCurrentSemester" resultType="String">
+      SELECT SEMESTER_NO
+      FROM SEMESTER
+      WHERE SEMESTER_ACT = 'Y'
+   </select>
+   <!-- 수강신청가능한 강의 리스트 -->
+   <select id="selectLectureListBySemester"
+      resultMap="lectureResultMap"
+	      resultType="kr.or.ddit.pfcp.common.vo.LectureVO" parameterType="map">
+		SELECT DISTINCT
+		L.LEC_NO,
+		L.REQ_NO,
+		L.USER_NO,
+		L.LEC_STATUS,
+		L.LR_NO,
+		L.CURRENT_ENROLLMENT,
+		R.REQ_NO AS REQ_REQ_NO,
+		R.LEC_NAME AS REQ_LEC_NAME,
+		R.PRE_DAY AS REQ_PRE_DAY,
+		SUBSTR(R.PRE_TIME, 1, 10) AS REQ_PRE_TIME,
+		R.MAX_CAPACITY AS REQ_MAX_CAPACITY,
+		S.SUBJECT_CODE,
+		S.SUBJECT_NAME,
+		S.CREDIT,
+		S.SEMESTER_NO,
+		U.USER_NO AS USER_USER_NO,
+		U.USER_NAME AS USER_USER_NAME
+		FROM LECTURE L
+		JOIN LECTURE_REQ R ON L.REQ_NO = R.REQ_NO
+		JOIN SUBJECT S ON R.SUBJECT_CODE = S.SUBJECT_CODE
+		JOIN PROFESSOR P ON L.USER_NO = P.USER_NO
+		JOIN TB_USER U ON P.USER_NO = U.USER_NO
+		<where>
+			L.LEC_STATUS = 'OPEN'
+			AND NOT EXISTS (
+			SELECT 1
+			FROM LECTURE_ENR E
+			WHERE E.LEC_NO = L.LEC_NO
+			AND E.USER_NO = #{userNo}
+			AND E.ENROLL_STATUS = '수강중'
+			)
+	
+			<if test="departmentNo != null and departmentNo != ''">
+				AND S.DEPARTMENT_NO = #{departmentNo}
+			</if>
+	
+			<if test="day != null and day != ''">
+				AND INSTR(R.PRE_DAY, #{day}) > 0
+			</if>
+	
+			<if test="period != null and period != ''">
+				AND INSTR(R.PRE_TIME, CONCAT(#{period}, '교시')) > 0
+			</if>
+	
+			<if test="credit != null">
+				AND S.CREDIT = #{credit}
+			</if>
+		</where>
+   </select>
+
+
+   <select id="selectEnrollmentCountByLectureNO" resultType="int">
+      SELECT
+      COUNT(*)
+      FROM LECTURE_ENR
+      WHERE LEC_NO =#{lecNo}
+   </select>
+
+   <!--수강신청 등록 
+   <insert id="insertLectureEnrollmentCount"
+      parameterType="kr.or.ddit.pfcp.common.vo.LectureEnrVO">
+      INSERT INTO LECTURE_ENR (
+      ENROLL_NO
+      , LEC_NO
+      , USER_NO
+      , ENROLL_TIME
+      , ENROLL_STATUS
+      )
+      VALUES (
+      'ENR' || LPAD(ENROLL_SEQ.NEXTVAL,
+      4, '0')
+      , #{lecNo}
+      , #{userNo}
+      , TO_CHAR(SYSDATE, 'YYYY-MM-DD
+      HH24:MI:SS')
+      , '수강중'
+      )
+   </insert>
+   -->
+   
+   <!--수강신청번호 시퀀스 확보  -->
+   <select id="getNextEnrollNo" resultType="string">
+      SELECT 'ENR' || LPAD(ENROLL_SEQ.NEXTVAL, 4, '0') FROM DUAL
+   </select>
+   
+   <!--수강신청update, insert  -->
+   <insert id="upsertLectureEnrollment" parameterType="kr.or.ddit.pfcp.common.vo.LectureEnrVO">
+      MERGE INTO LECTURE_ENR E
+      USING (SELECT #{lecNo} AS LEC_NO, #{userNo} AS USER_NO FROM DUAL) D
+      ON (E.LEC_NO = D.LEC_NO AND E.USER_NO = D.USER_NO)
+      WHEN MATCHED THEN
+      UPDATE SET
+      E.ENROLL_STATUS = '수강중',
+      E.ENROLL_TYPE = '일반',
+      E.ENROLL_TIME = TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')
+      WHEN NOT MATCHED THEN
+      INSERT (
+      ENROLL_NO,
+      LEC_NO,
+      USER_NO,
+      ENROLL_TIME,
+      ENROLL_STATUS,
+      ENROLL_TYPE
+      )
+      VALUES (
+      #{enrollNo},
+      #{lecNo},
+      #{userNo},
+      TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS'),
+      '수강중',
+      '일반'
+      )
+   </insert>
+   
+   <!-- 성적 존재 확인 -->
+   <select id="existsGradeByEnrollNo" resultType="boolean" parameterType="map">
+      SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+      FROM GRADE
+      WHERE LEC_NO = #{lecNo} AND USER_NO =#{userNo}
+   </select>
+   <!-- 수강신청 후 성적입력  -->
+   <insert id="insertGradeForEnroll" parameterType="map">
+   INSERT INTO GRADE (
+   GRADE_NO,
+   LEC_NO,
+   USER_NO,
+   IS_ACTIVE
+   ) VALUES (
+   'GRD' || LPAD(SEQ_GRADE.NEXTVAL, 5, '0'),
+   #{lecNo},
+   #{userNo},
+   'Y'
+   )
+   </insert>
+   <!--재수강신청 후 성적 활성화  -->
+   <update id="reviveGradeByEnrollNo" parameterType="map">
+   UPDATE GRADE
+   SET IS_ACTIVE = 'Y'
+   WHERE LEC_NO = #{lecNo} AND USER_NO =#{userNo}
+   </update>
+   <!--수강취소 성적 비활성화  -->
+   <update id="deactivateGradeByEnrollNo" parameterType="map">
+     UPDATE GRADE
+     SET IS_ACTIVE = 'N'
+     WHERE LEC_NO = #{lecNo} AND USER_NO =#{userNo}
+   </update>
+   
+   <!-- 수강신청 이력이 있으면 vo에 넣을 enrollno  -->
+   <select id="selectEnrollNoByUserAndLecture" resultType="string"  parameterType="map">
+      SELECT ENROLL_NO
+      FROM LECTURE_ENR
+      WHERE USER_NO = #{userNo}
+         AND LEC_NO = #{lecNo}
+   </select>
+   
+   <!-- 중복신청확인 쿼리 -->
+   <select id="existsEnrollmentByGrade" parameterType="map"
+      resultType="boolean">
+      SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+      FROM
+      LECTURE_ENR
+      WHERE USER_NO = #{userNo}
+      AND LEC_NO = #{lecNo}
+   </select>
+   
+   <!-- 예비 수강신청 중복 검증 --> 
+   <select id="existsPreEnrollment" parameterType="map"
+   resultType="boolean">
+   SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+   FROM LECTURE_ENR
+   WHERE USER_NO = #{userNo}
+      AND LEC_NO = #{lecNo}
+      AND ENROLL_TYPE = '예비'
+      AND ENROLL_STATUS != '취소'
+   </select>
+   
+   
+
+   
+   <!--수강신청하면 신청인원 체크 쿼리 -->
+   <update id="incrementCurrentEnrollment" parameterType="String">
+      UPDATE
+      LECTURE
+      SET CURRENT_ENROLLMENT = NVL(CURRENT_ENROLLMENT, 0) + 1
+      WHERE
+      LEC_NO = #{lecNo}
+   </update>
+
+   <!-- 중복신청확인 쿼리  이쿼리 예비도 만들기--> 
+   <select id="existsEnrollment" parameterType="map"
+      resultType="boolean">
+      SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+      FROM
+      LECTURE_ENR
+      WHERE USER_NO = #{userNo}
+      AND LEC_NO = #{lecNo}
+      AND ENROLL_STATUS = '수강중'
+   </select>
+
+   
+
+   <!-- 중복신청 검증을 위한 쿼리 -->
+   <select id="selectCurrentEnrollment" resultType="int"
+      parameterType="string">
+      SELECT CURRENT_ENROLLMENT
+      FROM LECTURE
+      WHERE LEC_NO =
+      #{lecNo}
+   </select>
+
+   <select id="selectMaxCapacity" resultType="int"
+      parameterType="string">
+      SELECT R.MAX_CAPACITY
+      FROM LECTURE L
+      JOIN LECTURE_REQ R ON
+      L.REQ_NO = R.REQ_NO
+      WHERE L.LEC_NO = #{lecNo}
+   </select>
+
+   <!-- 수강신청 목록을 보여주는 쿼리 -->
+
+   <select id="selectMyLectureEnrollList"
+      resultMap="enrollListresultMap">
+      SELECT
+      E.LEC_NO,
+      E.USER_NO,
+      SUBSTR(E.ENROLL_TIME, 1, 10) AS ENROLL_TIME,
+      E.ENROLL_STATUS,
+
+      S.SUBJECT_NAME AS SUBJECT_NAME,
+      R.PRE_DAY
+      AS PRE_DAY,
+      R.PRE_TIME AS PRE_TIME,
+      U.USER_NAME AS PROFESSOR_NAME
+
+      FROM
+      LECTURE_ENR E
+      JOIN LECTURE L ON E.LEC_NO = L.LEC_NO
+      JOIN LECTURE_REQ R
+      ON L.REQ_NO = R.REQ_NO
+      JOIN SUBJECT S ON R.SUBJECT_CODE =
+      S.SUBJECT_CODE
+      JOIN TB_USER U ON L.USER_NO = U.USER_NO
+
+      WHERE E.USER_NO =
+      #{userNo} AND E.ENROLL_STATUS='수강중'
+   </select>
+
+   <update id="deleteEnrollment" parameterType="map">
+      UPDATE LECTURE_ENR
+      SET ENROLL_STATUS = '취소'
+      WHERE LEC_NO= #{lecNo} AND USER_NO = #{userNo}
+   </update>
+
+   <update id="decrementCurrentEnrollment" parameterType="string">
+      UPDATE
+      LECTURE
+      SET CURRENT_ENROLLMENT = CASE
+      WHEN CURRENT_ENROLLMENT > 0 THEN
+      CURRENT_ENROLLMENT - 1
+      ELSE 0
+      END
+      WHERE LEC_NO = #{lecNo}
+   </update>
+
+   <select id="selectCurrentEnrollmentForUpdate"
+      parameterType="string" resultType="int">
+      SELECT CURRENT_ENROLLMENT
+      FROM
+      LECTURE
+      WHERE LEC_NO = #{lecNo}
+      FOR UPDATE
+   </select>
+   <select id="selectMappingEnrollStatus"
+      resultType="kr.or.ddit.pfcp.common.vo.LectureEnrVO">
+      SELECT LEC_NO
+      , USER_NO
+      , ENROLL_STATUS
+      FROM LECTURE_ENR
+      WHERE
+      USER_NO = #{userNo}
+      AND ENROLL_STATUS = '수강중'
+   </select>
+
+   <select id="selectLectureVOEnrollmentsByUserNo"
+      resultType="kr.or.ddit.pfcp.common.vo.LectureVO"
+      resultMap="lectureResultMapTime">
+      SELECT
+      E.LEC_NO,
+      L.REQ_NO,
+      L.LR_NO,
+      L.LEC_STATUS,
+      L.CURRENT_ENROLLMENT,
+
+      R.PRE_DAY
+      AS REQ_PRE_DAY,
+      R.PRE_TIME AS
+      REQ_PRE_TIME,
+      R.MAX_CAPACITY AS
+      REQ_MAX_CAPACITY,
+      R.LEC_NAME AS
+      REQ_LEC_NAME,
+
+      S.SUBJECT_CODE,
+      S.SUBJECT_NAME,
+      S.CREDIT,
+
+      U.USER_NO AS
+      USER_USER_NO,
+      U.USER_NAME AS
+      USER_USER_NAME
+      FROM LECTURE_ENR E
+      JOIN
+      LECTURE L ON E.LEC_NO = L.LEC_NO
+      JOIN LECTURE_REQ R ON L.REQ_NO =
+      R.REQ_NO
+      JOIN SUBJECT S ON
+      R.SUBJECT_CODE = S.SUBJECT_CODE
+      JOIN TB_USER U
+      ON L.USER_NO = U.USER_NO
+      WHERE E.USER_NO =#{userNo}
+      AND
+      E.ENROLL_STATUS='수강중'
+   </select>
+
+   <select id="selectLectureById" parameterType="string"
+      resultMap="lectureResultMapTime">
+      SELECT
+      L.LEC_NO,
+      L.REQ_NO,
+      L.LR_NO,
+      L.LEC_STATUS,
+      L.CURRENT_ENROLLMENT,
+
+      R.PRE_DAY AS REQ_PRE_DAY,
+      R.PRE_TIME AS
+      REQ_PRE_TIME,
+      R.MAX_CAPACITY AS
+      REQ_MAX_CAPACITY,
+      R.LEC_NAME AS
+      REQ_LEC_NAME,
+
+      S.SUBJECT_CODE,
+      S.SUBJECT_NAME,
+      S.CREDIT,
+
+      U.USER_NO AS
+      USER_USER_NO,
+      U.USER_NAME AS USER_USER_NAME
+
+      FROM LECTURE L
+      JOIN
+      LECTURE_REQ R ON L.REQ_NO = R.REQ_NO
+      JOIN SUBJECT S ON
+      R.SUBJECT_CODE =
+      S.SUBJECT_CODE
+      JOIN TB_USER U ON L.USER_NO = U.USER_NO
+      WHERE L.LEC_NO =
+      #{lecNo}
+   </select>
+
+   <!--예비수강신청 -->
+   <!-- <insert id="insertLecturePreEnroll"
+      parameterType="kr.or.ddit.pfcp.common.vo.LectureEnrVO">
+      INSERT INTO LECTURE_ENR (
+      ENROLL_NO
+      , LEC_NO
+      , USER_NO
+      , ENROLL_TIME
+      , ENROLL_STATUS
+      , ENROLL_TYPE
+      , PRIORITY
+      ) VALUES (
+      'ENR' ||
+      LPAD(ENROLL_SEQ.NEXTVAL, 4, '0')
+      , #{lecNo}
+      , #{userNo}
+      , TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')
+      , '예비'
+      , '예비'
+      , #{priority}
+      )
+   </insert> -->
+   <insert id="upsertPreLectureEnrollment" parameterType="kr.or.ddit.pfcp.common.vo.LectureEnrVO">
+   MERGE INTO LECTURE_ENR E
+   USING (SELECT #{lecNo} AS LEC_NO, #{userNo} AS USER_NO FROM DUAL) D
+   ON (E.LEC_NO = D.LEC_NO AND E.USER_NO = D.USER_NO)
+   WHEN MATCHED THEN
+   UPDATE SET
+   E.ENROLL_TYPE = '예비',
+   E.ENROLL_STATUS = '예비',
+   E.ENROLL_TIME = TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS'),
+   E.PRIORITY = #{priority}
+   WHEN NOT MATCHED THEN
+   INSERT (
+   ENROLL_NO,
+   LEC_NO,
+   USER_NO,
+   ENROLL_TIME,
+   ENROLL_STATUS,
+   ENROLL_TYPE,
+   PRIORITY
+   ) VALUES (
+   #{enrollNo},
+   #{lecNo},
+   #{userNo},
+   TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS'),
+   '예비',
+   '예비',
+   #{priority}
+   )
+   </insert>
+   
+   <select id="selectPreEnrollListByUserNo"
+      resultMap="enrollListresultMap" parameterType="string">
+      SELECT
+      E.ENROLL_NO
+      , E.LEC_NO
+      , E.USER_NO
+      , SUBSTR(E.ENROLL_TIME, 1, 10) AS ENROLL_TIME
+      , E.ENROLL_STATUS
+      , E.ENROLL_TYPE
+      , E.PRIORITY
+      , S.SUBJECT_CODE
+      , S.SUBJECT_NAME
+      , S.CREDIT
+      , R.PRE_DAY
+      , R.PRE_TIME
+      , U.USER_NAME AS PROFESSOR_NAME
+      FROM LECTURE_ENR E
+      JOIN
+      LECTURE L ON E.LEC_NO = L.LEC_NO
+      JOIN
+      LECTURE_REQ R ON L.REQ_NO =
+      R.REQ_NO
+      JOIN
+      SUBJECT S ON R.SUBJECT_CODE = S.SUBJECT_CODE
+      JOIN
+      TB_USER U
+      ON L.USER_NO = U.USER_NO
+      WHERE E.USER_NO = #{userNo} 
+         AND E.ENROLL_TYPE = '예비' 
+         AND ENROLL_STATUS != '취소'
+   </select>
+   <!-- 예비 수강신청 취소  -->
+   <update id="cancelPreEnroll" parameterType="map">
+      UPDATE LECTURE_ENR
+      SET ENROLL_STATUS = '취소'
+      WHERE USER_NO = #{userNo}
+      AND LEC_NO = #{lecNo}
+      AND ENROLL_TYPE = '예비'
+   </update>
+   
+   <select id="selectPreEnrollListByUserNoOrderByPriority">
+      SELECT ENROLL_NO
+      , LEC_NO
+      , USER_NO
+      , ENROLL_TIME
+      , ENROLL_TYPE
+      , PRIORITY
+      , ATTENDANCE
+      , EVAL_YN
+      , GRADE
+      FROM LECTURE_ENR
+      WHERE USER_NO =#{userNo}
+         AND ENROLL_TYPE= '예비'
+         AND ENROLL_STATUS = '예비'
+         ORDER BY PRIORITY ASC, ENROLL_TIME ASC
+   </select>
+   <!-- 본수강  -->
+   <update id="updateToRegularEnrollment" parameterType="string">
+      UPDATE LECTURE_ENR
+      SET ENROLL_TYPE = '일반',
+      ENROLL_STATUS = '수강중'
+      WHERE ENROLL_NO = #{enrollNo}
+   </update>
+   
+   <!--신청기간  -->
+   <select id="isNowRegularEnrollPeriod" resultType="boolean">
+   SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+   FROM SCHEDULE
+   WHERE SCHEDULE_TYPE_NO = '1'
+   AND SYSDATE BETWEEN TO_DATE(START_DATE, 'YYYY-MM-DD')
+   AND TO_DATE(END_DATE, 'YYYY-MM-DD')
+   AND IS_ACTIVE = 'Y'
+   </select>
+
+   <select id="selectCurrentScheduleByType" resultType="kr.or.ddit.pfcp.common.vo.ScheduleVO">
+   SELECT
+   SCHEDULE_NO,
+   SCHEDULE_TYPE_NO,
+   SCHEDULE_TITLE,
+   START_DATE,
+   END_DATE,
+   IS_ACTIVE
+   FROM SCHEDULE
+   WHERE SCHEDULE_TYPE_NO = '1'
+   AND IS_ACTIVE = 'Y'
+   AND TO_DATE(START_DATE, 'YYYY-MM-DD') &lt;= SYSDATE
+   AND TO_DATE(END_DATE, 'YYYY-MM-DD') &gt;= SYSDATE
+   FETCH FIRST 1 ROWS ONLY
+   </select>
+   
+   <select id="selectDepartmentList">
+	SELECT 
+		DEPARTMENT_NO
+		, DEPARTMENT_NAME
+	FROM DEPARTMENT
+   </select>
+
+</mapper>

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.student.lecture.grade.mapper.StudentGradeMapper">
+	<resultMap type="LectureEnrVO" id="lectureEnrMap" autoMapping="true">
+	    <id property="enrollNo" column="ENROLL_NO"/>
+	    
+	    <association property="subject" javaType="SubjectVO" autoMapping="true">
+	        <id property="subjectCode" column="SUBJECT_CODE"/>
+	    </association>
+	    
+	    <association property="lectureReq" javaType="LectureReqVO" autoMapping="true">
+	    	<id property="reqNo" column="REQ_NO"/>	
+	    	<result property="lecName" column="LEC_NAME"/>
+	    </association>
+	    
+	    <association property="semester" javaType="kr.or.ddit.pfcp.common.vo.SemesterVO" autoMapping="true">
+	    	<id property="semesterNo" column="SEMESTER_NO"/>
+	    </association>
+	</resultMap>
+	
+	<resultMap id="counselReqMap" type="CounselReqVO">
+	    <id property="counselReqno" column="COUNSEL_REQNO"/>
+	    <result property="preferredDate" column="PREFERRED_DATE"/>
+	    <result property="typeCode" column="TYPE_CODE"/>
+	    <result property="userNo" column="USER_NO"/>
+	    <result property="status" column="STATUS"/>
+	    <result property="counselReqdate" column="COUNSEL_REQDATE"/>
+	    <result property="counselComment" column="COUNSEL_COMMENT"/>
+	    <result property="reqType" column="REQ_TYPE"/>
+	    
+	    <association property="type" javaType="kr.or.ddit.pfcp.common.vo.TypeVO">
+	        <id property="typeCode" column="TYPE_CODE"/>
+	        <result property="typeName" column="TYPE_NAME"/>
+	    </association>
+	    
+	    <association property="subject" javaType="SubjectVO">
+	    	<id property="subjectCode" column="SUBJECT_CODE" />	
+	    	<result property="subjectName" column="SUBJECT_NAME" />
+	    </association>
+	    
+	    <association property="lectureReq" javaType="LectureReqVO" autoMapping="true">
+	    	<id property="reqNo" column="REQ_NO"/>
+	    	<result property="lecName" column="LEC_NAME"/>
+	    </association>
+	</resultMap>
+
+	<select id="selectStudentGradeList" resultMap="lectureEnrMap">
+		SELECT E.SEMESTER_NO
+           	   , E.SEMESTER_NAME
+               , A.SUBJECT_NAME
+               , A.CREDIT
+               , D.GRADE
+               , B.LEC_NAME
+      	  FROM SUBJECT A
+    INNER JOIN LECTURE_REQ B ON A.SUBJECT_CODE = B.SUBJECT_CODE
+    INNER JOIN LECTURE C ON B.REQ_NO = C.REQ_NO
+    INNER JOIN LECTURE_ENR D ON C.LEC_NO = D.LEC_NO
+    INNER JOIN SEMESTER E ON A.SEMESTER_NO = E.SEMESTER_NO
+     	 WHERE D.USER_NO = #{userNo}
+       	   AND D.EVAL_YN = 'Y'
+    	<if test="semesterNo != null and semesterNo != ''">
+       	   AND E.SEMESTER_NO = #{semesterNo}
+    	</if>
+      ORDER BY E.SEMESTER_NAME DESC
+	</select>
+	
+	<select id="selectSemesterList">
+		SELECT SEMESTER_NO
+		       , YEAR
+		       , TERM
+		       , SEMESTER_NAME
+		       , SEMESTER_ACT
+		  FROM SEMESTER
+	</select>
+	
+	<select id="selectStudentGradeListSearch" resultMap="lectureEnrMap">
+		SELECT E.SEMESTER_NO
+	    	   , E.SEMESTER_NAME
+	           , A.SUBJECT_NAME
+	           , B.LEC_NAME
+	           , A.CREDIT
+	           , D.GRADE
+	      FROM SUBJECT A
+	INNER JOIN LECTURE_REQ B ON A.SUBJECT_CODE=B.SUBJECT_CODE
+	INNER JOIN LECTURE C ON B.REQ_NO=C.REQ_NO
+	INNER JOIN LECTURE_ENR D ON C.LEC_NO=D.LEC_NO
+	INNER JOIN SEMESTER E ON A.SEMESTER_NO=E.SEMESTER_NO
+	     WHERE D.USER_NO=#{userNo}
+              AND E.SEMESTER_NO=#{semesterNo}
+	       AND D.EVAL_YN='Y'
+	  ORDER BY E.SEMESTER_NAME DESC
+	</select>
+	
+	<select id="selectStudentGradeAppealList" resultMap="counselReqMap">
+		SELECT A.COUNSEL_REQNO,
+		       SUBSTR(A.PREFERRED_DATE, 1, 10) AS PREFERRED_DATE,
+		       A.USER_NO,
+		       A.COUNSEL_REQDATE,
+		       A.COUNSEL_COMMENT,
+		       A.STATUS,
+		       (
+		         SELECT LEC_NAME
+		           FROM LECTURE_REQ C
+		          WHERE C.SUBJECT_CODE = A.SUBJECT_CODE
+		            AND ROWNUM = 1
+		       ) AS LEC_NAME
+		  FROM COUNSEL_REQ A
+		 INNER JOIN TYPE B ON A.TYPE_CODE = B.TYPE_CODE
+		 WHERE B.TYPE_CODE = 'CN_APPEAL'
+		   AND A.USER_NO = #{userNo}
+		   AND (A.STATUS = '대기' OR A.STATUS = '승인')
+	</select>
+	
+	<select id="selectSubjectList" resultMap="lectureEnrMap">
+		SELECT A.ENROLL_NO
+	           , A.LEC_NO
+	           , A.USER_NO
+	           , A.ENROLL_TIME
+	           , A.ENROLL_STATUS
+	           , A.ENROLL_TYPE
+	           , A.PRIORITY
+	           , A.ATTENDANCE
+	           , A.EVAL_YN
+	           , A.GRADE
+	           , C.LEC_NAME
+	           , D.SUBJECT_CODE
+	           , D.SUBJECT_NAME
+	      FROM LECTURE_ENR A
+	INNER JOIN LECTURE B ON A.LEC_NO=B.LEC_NO
+	INNER JOIN LECTURE_REQ C ON B.REQ_NO=C.REQ_NO
+	INNER JOIN SUBJECT D ON C.SUBJECT_CODE=D.SUBJECT_CODE
+	     WHERE A.USER_NO=#{userNo}
+	</select>
+	
+	<insert id="insertStudentGradeAppeal">
+		INSERT INTO COUNSEL_REQ (
+            COUNSEL_REQNO, 
+			PREFERRED_DATE, 
+			TYPE_CODE, 
+			USER_NO, 
+			STATUS, 
+			COUNSEL_REQDATE, 
+			COUNSEL_COMMENT,
+			REQ_TYPE,
+			SUBJECT_CODE
+		)
+		VALUES (
+			'CR' || LPAD(COUNSEL_REQ_SEQ.NEXTVAL, 8, '0')
+			, null
+			, 'CN_APPEAL'
+			, #{userNo}
+			, '대기'
+			, TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+			, #{counselComment}
+			, '온라인'
+			, #{subjectCode}
+		)
+	</insert>
+	
+	<select id="selectGradeByUserAndLecture" parameterType="map" resultType="GradeVO">
+	    SELECT GRADE_NO
+	    	   , LEC_NO
+	    	   , USER_NO
+	    	   , FINAL_GRADE
+	    	   , GRADE_DATE
+	    	   , MIDTERM_SCORE
+	    	   , FINAL_SCORE
+	    	   , ASSIGNMENT_SCORE
+	    	   , ATTENDANCE_SCORE
+	    	   , IS_WITHDRAWN
+	    	   , IS_ACTIVE
+	      FROM GRADE
+	     WHERE USER_NO = #{userNo}
+	       AND LEC_NO = #{lecNo}
+	</select>
+	
+	<select id="selectLecNoByExamNo" parameterType="string" resultType="string">
+        SELECT LEC_NO
+          FROM EXAM
+         WHERE EXAM_NO = #{examNo}
+    </select>
+	
+	<insert id="upsertGrade" parameterType="kr.or.ddit.pfcp.common.vo.GradeVO">
+        MERGE INTO GRADE g
+        USING (SELECT #{gradeNo} AS GRADE_NO FROM dual) src
+        ON (g.GRADE_NO = src.GRADE_NO)
+        WHEN MATCHED THEN
+            UPDATE 
+               SET MIDTERM_SCORE=NVL(#{midtermScore}, g.MIDTERM_SCORE)
+                   , FINAL_SCORE=NVL(#{finalScore}, g.FINAL_SCORE)
+                   , GRADE_DATE=TO_DATE(#{gradeDate}, 'YYYY-MM-DD')
+        WHEN NOT MATCHED THEN
+            INSERT (
+            	GRADE_NO
+            	, LEC_NO
+            	, USER_NO
+            	, MIDTERM_SCORE
+            	, FINAL_SCORE
+            	, ASSIGNMENT_SCORE
+            	, ATTENDANCE_SCORE
+            )
+            VALUES (
+            	'GRD' || LPAD(SEQ_GRADE.NEXTVAL, 5, '0')
+            	, #{lecNo}
+            	, #{userNo}
+            	, #{midtermScore}
+            	, #{finalScore}
+            	, #{assignmentScore}
+            	, #{attendanceScore}
+            )
+    </insert>
+</mapper>

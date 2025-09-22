@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * << 개정이력(Modification Information) >>
+ * 수정일		수정자		수정 내용
+ * ======================================
+ * 250708   김규민        최초 생성
+ * 250709   김규민        쿼리문 수정
+ -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.college.mapper.GraduationRequestMapper">
+	<select id="selectAllGraduationRequestList" resultType="kr.or.ddit.pfcp.common.vo.GraduationRequestVO">
+		SELECT
+			GRAD_REQ_NO
+			,USER_NO
+			,SEMESTER_NO
+			,REQ_DATE
+			,GRAD_STATUS
+			,COM
+		FROM GRADUATION_REQUEST 
+
+	<!-- SELECT
+    GR.GRAD_REQ_NO,         
+    GR.STUDENT_NO,         
+    GR.SEMESTER_NO,        
+    GR.REQ_DATE,           
+    GR.GRAD_STATUS,        
+    GR.COMMENT,             
+    D.DEPARTMENT_NAME       
+FROM
+    GRADUATION_REQUEST GR  
+JOIN
+    STUDENT S ON GR.STUDENT_NO = S.USER_NO 
+JOIN
+    DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO;  -->
+	</select>
+</mapper>

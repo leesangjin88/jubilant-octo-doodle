@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.grademanage.mapper.GrademanageMapper">
+
+	<resultMap id="lectureStudentResultMap"
+		type="kr.or.ddit.pfcp.common.vo.LectureEnrVO" autoMapping="true">
+		<id property="enrollNo" column="ENROLL_NO" />
+
+		<association property="user"
+			javaType="kr.or.ddit.pfcp.common.vo.UserVO" autoMapping="true" />
+
+		<association property="lecture"
+			javaType="kr.or.ddit.pfcp.common.vo.LectureVO" autoMapping="true" />
+
+
+		<association property="lectureReq"
+			javaType="kr.or.ddit.pfcp.common.vo.LectureReqVO" autoMapping="true">
+			<id property="reqNo" column="REQ_NO" />
+		</association>
+
+		<association property="subject"
+			javaType="kr.or.ddit.pfcp.common.vo.SubjectVO" autoMapping="true">
+			<id property="subjectCode" column="SUBJECT_CODE" />
+		</association>
+
+		<association property="department"
+			javaType="kr.or.ddit.pfcp.common.vo.DepartmentVO" autoMapping="true">
+			<id property="departmentNo" column="DEPARTMENT_NO" />
+		</association>
+
+		<association property="student"
+			javaType="kr.or.ddit.pfcp.common.vo.StudentVO" autoMapping="true">
+			<id property="userNo" column="USER_NO" />
+		</association>
+		
+		<association property="gradeVO"
+			javaType="kr.or.ddit.pfcp.common.vo.GradeVO" autoMapping="true">
+			<id property="gradeNo" column="GRADE_NO" />
+		</association>
+		
+		
+	</resultMap>
+
+	<select id="selectLectureStudent" resultMap="lectureStudentResultMap">
+		SELECT
+		    LE.LEC_NO,
+		    LE.ENROLL_NO,
+		    LE.USER_NO,
+		    LE.ENROLL_STATUS,
+		    LE.ENROLL_TYPE,
+		    LE.GRADE,
+		    U.USER_NAME,
+		    S.DEPARTMENT_NO,
+		    D.DEPARTMENT_NAME,
+		    LR.LEC_NAME,
+		    
+		    -- GRADE 테이블 컬럼
+		    G.MIDTERM_SCORE,
+		    G.FINAL_SCORE,
+		    G.ASSIGNMENT_SCORE,
+		    G.ATTENDANCE_SCORE,
+		    G.FINAL_GRADE
+		FROM
+		    LECTURE_ENR LE
+		JOIN TB_USER U ON LE.USER_NO = U.USER_NO
+		JOIN STUDENT S ON S.USER_NO = U.USER_NO
+		JOIN DEPARTMENT D ON S.DEPARTMENT_NO = D.DEPARTMENT_NO
+		JOIN LECTURE L ON LE.LEC_NO = L.LEC_NO
+		JOIN LECTURE_REQ LR ON LR.REQ_NO = L.REQ_NO
+		LEFT JOIN GRADE G ON G.LEC_NO = LE.LEC_NO AND G.USER_NO = LE.USER_NO
+		WHERE LE.LEC_NO = #{what}
+		      AND ENROLL_STATUS = '수강중'
+		OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+	</select>
+	
+	<select id="selectAttendanceScore">
+		  SELECT 
+		    ROUND(
+		      (
+		        (
+		          (s.CREDIT * 15) 
+		          - 
+		          (
+		            COUNT(CASE a.ATTEND_STATUS WHEN '지각' THEN 1 END) 
+		            + s.CREDIT * COUNT(CASE a.ATTEND_STATUS WHEN '결석' THEN 1 END)
+		          )
+		        ) 
+		        / (s.CREDIT * 15.0)
+		      ) * 100
+		    , 0) AS attendanceScore
+		  FROM ATTENDANCE a
+		  JOIN LECTURE_ENR le ON a.ENROLL_NO = le.ENROLL_NO
+		  JOIN LECTURE l ON le.LEC_NO = l.LEC_NO
+		  JOIN LECTURE_REQ lr ON l.REQ_NO = lr.REQ_NO
+		  JOIN SUBJECT s ON lr.SUBJECT_CODE = s.SUBJECT_CODE
+		  WHERE le.LEC_NO = #{lecNo}
+		    AND le.USER_NO = 'ST20220810'
+		  GROUP BY s.CREDIT
+	</select>
+
+
+	<update id="updateGradeIfChanged" parameterType="map">
+	    UPDATE GRADE
+	    SET MIDTERM_SCORE = #{midtermScore},
+	    	FINAL_SCORE = #{finalScore},
+	    	ASSIGNMENT_SCORE = #{assignmentScore}
+	    WHERE (USER_NO = #{userNo} AND LEC_NO = #{lecNo}) 
+	    	  AND ( (NVL(MIDTERM_SCORE, -1) != NVL(#{midtermScore}, -1)) 
+	    	  	   OR (NVL(FINAL_SCORE, -1) != NVL(#{finalScore}, -1)) 
+	    	  	   OR (NVL(ASSIGNMENT_SCORE, -1) != NVL(#{assignmentScore}, -1)))
+	</update>
+	
+	
+	
+<!-- 	<select id="selectGradeList" parameterType="String"> -->
+<!-- 		SELECT -->
+<!-- 		    GRADE_NO, -->
+<!-- 		    LEC_NO, -->
+<!-- 		    USER_NO, -->
+<!-- 		    FINAL_GRADE, -->
+<!-- 		    GRADE_DATE, -->
+<!-- 		    MIDTERM_SCORE, -->
+<!-- 		    FINAL_SCORE, -->
+<!-- 		    ASSIGNMENT_SCORE, -->
+<!-- 		    ATTENDANCE_SCORE -->
+<!-- 		FROM -->
+<!-- 		    GRADE -->
+<!-- 		ORDER BY GRADE_NO -->
+<!-- 		WHERE LEC_NO = #{lecNo}  -->
+<!-- 		  AND USER_NO = #{userNo} -->
+<!-- 	</select> -->
+	
+
+</mapper>

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.professor.exam.mapper.ProfessorExamMapper">
+	<resultMap type="ExamVO" id="examMap">
+	    <id property="examNo" column="EXAM_NO"/>
+	    <result property="lecNo" column="LEC_NO"/>
+	    <result property="examName" column="EXAM_NAME"/>
+	    <result property="examDate" column="EXAM_DATE"/>
+	    <result property="examType" column="EXAM_TYPE"/>
+	    <result property="examLimit" column="EXAM_LIMIT"/>
+	    <result property="facilityNo" column="FACILITY_NO"/>
+	    
+	    <association property="user" javaType="UserVO">
+	        <id property="userNo" column="USER_NO"/>
+	        <result property="userName" column="USER_NAME"/>
+	    </association>
+	    
+	    <association property="facility" javaType="FacilityVO">
+	        <id property="facilityNo" column="FACILITY_NO"/>
+	        <result property="facilityName" column="FACILITY_NAME"/>
+	    </association>
+	    
+	    <association property="lectureReq" javaType="LectureReqVO">
+	    	<id property="reqNo" column="REQ_NO"/>
+	    	<result property="lecName" column="LEC_NAME"/>
+	    </association>
+	    
+	    <association property="atchFile" javaType="AtchFileVO">
+	        <id property="atchId" column="ATCH_ID"/>
+	        <result property="atchOriginName" column="ATCH_ORIGIN_NAME"/>
+	        <result property="atchSaveName" column="ATCH_SAVE_NAME"/>
+	        <result property="atchMime" column="ATCH_MIME"/>
+	        <result property="atchSize" column="ATCH_SIZE"/>
+	    </association>
+	</resultMap>
+	
+	<select id="selectFacilityList" resultMap="examMap">
+		SELECT FACILITY_NO
+	           , FACILITY_NAME
+	      FROM FACILITY
+	</select>
+
+	<select id="selectLecNameList" resultMap="examMap">
+		SELECT A.LEC_NO
+	           , B.LEC_NAME
+	      FROM LECTURE A
+	INNER JOIN LECTURE_REQ B ON A.REQ_NO=B.REQ_NO 
+	     WHERE A.USER_NO=#{userNo}
+	       AND A.LEC_STATUS='OPEN'
+	</select>
+
+	<select id="selectExamList" resultMap="examMap">
+	    SELECT EXAM_NO
+	           , A.LEC_NO
+	           , A.EXAM_NAME
+	           , A.EXAM_DATE
+	           , A.EXAM_TYPE
+	           , A.EXAM_LIMIT
+	           , A.FACILITY_NO
+	           , C.USER_NO
+	           , C.USER_NAME
+	           , A.FACILITY_NO
+	           , D.LEC_NAME
+	      FROM EXAM A
+	INNER JOIN LECTURE B ON A.LEC_NO=B.LEC_NO
+	INNER JOIN TB_USER C ON B.USER_NO=C.USER_NO
+	INNER JOIN LECTURE_REQ D ON B.REQ_NO=D.REQ_NO
+	     WHERE C.USER_NO=#{userNo}
+	       AND B.LEC_STATUS='OPEN'
+	       AND A.STATUS='Y'
+	  ORDER BY A.EXAM_DATE
+	</select>
+	
+	<select id="selectQuestionList" parameterType="string" resultType="kr.or.ddit.pfcp.common.vo.QuestionAnswerVO">
+		SELECT QUESTION_NO
+	           , EXAM_NO
+	           , QUESTION_SEQ
+	           , ANSWER
+	           , QUESTION_SCORE
+	      FROM QUESTION_ANSWER
+	     WHERE EXAM_NO=#{examNo}
+	</select>
+	
+	<select id="selectExamDetail" resultMap="examMap">
+		SELECT EXAM_NO
+	           , A.LEC_NO
+	           , A.EXAM_NAME
+	           , A.EXAM_DATE
+	           , A.EXAM_TYPE
+	           , A.EXAM_LIMIT
+	           , A.FACILITY_NO
+	           , A.FILE_REF_NO
+	           , C.USER_NO
+	           , C.USER_NAME
+	           , A.FACILITY_NO
+	           , E.LEC_NAME
+	           , G.ATCH_ID
+	           , G.ATCH_ORIGIN_NAME
+	      FROM EXAM A
+	INNER JOIN LECTURE B ON A.LEC_NO=B.LEC_NO
+	INNER JOIN TB_USER C ON B.USER_NO=C.USER_NO
+	INNER JOIN LECTURE_REQ E ON B.REQ_NO=E.REQ_NO
+	INNER JOIN FILE_REF F ON A.FILE_REF_NO=F.FILE_REF_NO
+	INNER JOIN ATCH_FILE G ON F.ATCH_ID=G.ATCH_ID
+	     WHERE A.EXAM_NO=#{examNo}
+	       AND B.LEC_STATUS='OPEN'
+	</select>
+
+	<insert id="insertExam">
+		INSERT INTO EXAM (
+			EXAM_NO
+			, LEC_NO
+			, EXAM_NAME
+			, EXAM_DATE
+			, EXAM_TYPE
+			, EXAM_LIMIT
+			, FACILITY_NO
+			, FILE_REF_NO
+			, STATUS
+		) VALUES (
+			#{examNo}
+			, #{lecNo}
+			, #{examName}
+			, #{examDate}
+			, #{examType}
+			, #{examLimit}
+			, #{facilityNo}
+			, #{fileRefNo}
+			, 'Y'
+		)
+	</insert>
+	
+	<insert id="insertQuestionAnswer">
+		INSERT INTO QUESTION_ANSWER (
+			QUESTION_NO
+			, EXAM_NO
+			, QUESTION_SEQ
+			, ANSWER
+			, QUESTION_SCORE
+		)
+		VALUES (
+			'QN' || LPAD(SEQ_QUESTION_NO.NEXTVAL, 8, '0')
+			, #{examNo}
+			, #{questionSeq}
+			, #{answer}
+			, #{questionScore}
+		)
+	</insert>
+	
+	<update id="updateExam">
+		UPDATE EXAM
+		   SET LEC_NO= #{lecNo}
+		   	   , EXAM_NAME=#{examName}
+		   	   , EXAM_DATE=#{examDate}
+		   	   , EXAM_TYPE=#{examType}
+		   	   , EXAM_LIMIT=#{examLimit}
+		   	   , FACILITY_NO=#{facilityNo}
+		   	   <if test="fileRefNo != null and fileRefNo != ''">
+		   	   , FILE_REF_NO=#{fileRefNo}		   	   
+		   	   </if>
+		 WHERE EXAM_NO = #{examNo}
+	</update>
+	
+	<update id="updateQuestionAnswer">
+		UPDATE QUESTION_ANSWER
+		   SET ANSWER=#{answer}
+		   	   , QUESTION_SCORE=#{questionScore}
+		 WHERE EXAM_NO = #{examNo} AND QUESTION_SEQ = #{questionSeq}
+	</update>
+	
+	<update id="deleteExam">
+		UPDATE EXAM
+		   SET STATUS='N'
+		 WHERE EXAM_NO=#{examNo}
+	</update>
+</mapper>

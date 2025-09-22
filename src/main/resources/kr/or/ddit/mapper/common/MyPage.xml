@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.common.mapper.MyPageMapper">
+
+<!-- ResultMap도 수정 필요 -->
+	<resultMap id="userMap" type="UserVO" autoMapping="true">
+		<!-- UserVO 필드들 (상속받은 필드들) -->
+		<id property="userNo" column="USER_NO" />
+		<result property="userName" column="USER_NAME" />
+		<result property="userEmail" column="USER_EMAIL" />
+		<result property="userTel" column="USER_TEL" />
+		<result property="userAdd1" column="USER_ADD1" />
+		<result property="userAdd2" column="USER_ADD2" />
+		<result property="userRegno1" column="USER_REGNO1" />
+		<result property="gender" column="GENDER" />
+		<result property="bankCd" column="BANK_CD" />
+		<result property="userBankno" column="USER_BANKNO" />
+		<result property="userRole" column="USER_ROLE" />
+	
+	
+		<association property="department" javaType="kr.or.ddit.pfcp.common.vo.DepartmentVO" autoMapping="true">
+			<id property="departmentNo" column="DEPARTMENT_NO" />
+			<result property="departmentName" column="DEPARTMENT_NAME" />
+		</association>
+		
+		<association property="professor" javaType="ProfessorVO" autoMapping="true" />
+		<association property="staff" javaType="StaffVO" autoMapping="true" />
+		<association property="student" javaType="StudentVO" autoMapping="true" />
+		
+	</resultMap>
+
+<!-- 	교수 조회용 -->
+	<select id="selectMyPagePr" resultMap="userMap">
+		SELECT  TB_USER.USER_NO,
+				USER_PASS,
+				USER_NAME,
+				GENDER,
+				USER_REGNO1,
+				USER_REGNO2,
+				USER_TEL,
+				USER_ZIP,
+				USER_ADD1,
+				USER_ADD2,
+				USER_EMAIL,
+				BANK_CD,
+				USER_ROLE,
+				USER_BANKNO,
+				PROFESSOR.DEPARTMENT_NO,
+				PROFESSOR.PRO_POSITION,
+				DEPARTMENT.DEPARTMENT_NAME
+		   FROM TB_USER
+		   JOIN PROFESSOR ON PROFESSOR.USER_NO = TB_USER.USER_NO
+		   JOIN DEPARTMENT ON DEPARTMENT.DEPARTMENT_NO = PROFESSOR.DEPARTMENT_NO
+		  WHERE TB_USER.USER_NO=#{userNo}
+	</select>
+	
+<!-- 	학생 조회용 -->	
+	<select id="selectMyPageST" resultMap="userMap" >
+		SELECT  TB_USER.USER_NO,
+				USER_PASS,
+				USER_NAME,
+				GENDER,
+				USER_REGNO1,
+				USER_REGNO2,
+				USER_TEL,
+				USER_ZIP,
+				USER_ADD1,
+				USER_ADD2,
+				USER_EMAIL,
+				BANK_CD,
+				USER_ROLE,
+				USER_BANKNO,
+				STUDENT.DEPARTMENT_NO,
+				STUDENT.STUDENT_GRADE,
+				STUDENT.STU_STATUS,
+				DEPARTMENT.DEPARTMENT_NAME
+		   FROM TB_USER
+		   JOIN STUDENT ON STUDENT.USER_NO = TB_USER.USER_NO
+		   JOIN DEPARTMENT ON DEPARTMENT.DEPARTMENT_NO = STUDENT.DEPARTMENT_NO
+		  WHERE TB_USER.USER_NO=#{userNo}
+	</select>
+	
+<!-- 	교직원 조회용 -->
+	<select id="selectMyPageAD" resultMap="userMap">
+		SELECT  TB_USER.USER_NO,
+				USER_PASS,
+				USER_NAME,
+				GENDER,
+				USER_REGNO1,
+				USER_REGNO2,
+				USER_TEL,
+				USER_ZIP,
+				USER_ADD1,
+				USER_ADD2,
+				USER_EMAIL,
+				BANK_CD,
+				USER_ROLE,
+				USER_BANKNO,
+				STAFF.STAFF_DEPARTMENT,
+				STAFF.STAFF_POSITION
+		   FROM TB_USER
+		   JOIN STAFF ON STAFF.USER_NO = TB_USER.USER_NO
+		  WHERE TB_USER.USER_NO=#{userNo}
+	</select>
+	
+</mapper>

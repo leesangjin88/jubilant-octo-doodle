@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.MemberMapper">
+	<select id="selectMember" parameterType="string"
+		resultType="MemberVO">
+		SELECT MEM_ID,
+		MEM_PASSWORD,
+		MEM_NAME,
+		MEM_REGNO1,
+		MEM_REGNO2,
+		MEM_BIR,
+		MEM_ZIP,
+		MEM_ADD1,
+		MEM_ADD2,
+		MEM_HOMETEL,
+		MEM_COMTEL,
+		MEM_HP,
+		MEM_MAIL,
+		MEM_JOB,
+		MEM_HOBBY,
+		MEM_MEMORIAL,
+		MEM_MEMORIALDAY,
+		MEM_MILEAGE,
+		MEM_DELETE,
+		MEM_ROLE
+		FROM MEMBER
+		WHERE MEM_ID = #{username}
+	</select>
+		<select id="selectMemberByMail">
+		SELECT MEM_ID,
+				MEM_PASSWORD,
+				MEM_NAME,
+				MEM_REGNO1,
+				MEM_REGNO2,
+				MEM_BIR,
+				MEM_ZIP,
+				MEM_ADD1,
+				MEM_ADD2,
+				MEM_HOMETEL,
+				MEM_COMTEL,
+				MEM_HP,
+				MEM_MAIL,
+				MEM_JOB,
+				MEM_HOBBY,
+				MEM_MEMORIAL,
+				MEM_MEMORIALDAY,
+				MEM_MILEAGE,
+				MEM_DELETE,
+				MEM_ROLE
+		FROM MEMBER
+		WHERE MEM_MAIL = #{mail}
+	</select>
+	
+	<insert id="insertMember">
+		INSERT INTO MEMBER(
+		MEM_ID,
+		MEM_PASSWORD,
+		MEM_NAME,
+		MEM_REGNO1,
+		MEM_REGNO2,
+		MEM_BIR,
+		MEM_ZIP,
+		MEM_ADD1,
+		MEM_ADD2,
+		MEM_HOMETEL,
+		MEM_COMTEL,
+		MEM_HP,
+		MEM_MAIL,
+		MEM_JOB,
+		MEM_HOBBY,
+		MEM_MEMORIAL,
+		MEM_MEMORIALDAY)
+		VALUES(
+		#{memId},
+		#{memPassword},
+		#{memName},
+		#{memRegno1},
+		#{memRegno2},
+		#{memBir},
+		#{memZip},
+		#{memAdd1},
+		#{memAdd2},
+		#{memHometel},
+		#{memComtel},
+		#{memHp},
+		#{memMail},
+		#{memJob},
+		#{memHobby},
+		#{memMemorial},
+		#{memMemorialday})
+	</insert>
+	
+	<update id="updateMemberDelete">
+		UPDATE MEMBER
+		   SET MEM_DELETE='T'
+		 WHERE MEM_ID=#{id}
+	</update>
+	
+	<update id="updateMember">
+		UPDATE MEMBER
+		   SET MEM_NAME=#{memName},
+				MEM_ZIP=#{memZip},
+				MEM_ADD1=#{memAdd1},
+				MEM_ADD2=#{memAdd2},
+				MEM_HOMETEL=#{memHometel},
+				MEM_COMTEL=#{memComtel},
+				MEM_HP=#{memHp},
+				MEM_MAIL=#{memMail},
+				MEM_JOB=#{memJob},
+				MEM_HOBBY=#{memHobby},
+				MEM_MEMORIAL=#{memMemorial},
+				MEM_MEMORIALDAY=#{memMemorialday}
+		WHERE MEM_ID=#{memId}
+				
+	</update>
+</mapper>

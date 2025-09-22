@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.pfcp.staff.programStatistics.mapper.ProgramStatisticsMapper">
+
+	<select id="selectTodayStatistics"
+		resultType="kr.or.ddit.pfcp.common.vo.ProgramStatisticsVO">
+		SELECT
+		STAT_DATE
+		, TOTAL_PROGRAMS
+		, TOTAL_APPLICANTS
+		, MONTHLY_APPLY
+		, COMPLETE_RATE
+		, REG_DATE
+		FROM PROGRAM_STATISTICS
+		WHERE
+		STAT_DATE = TRUNC(SYSDATE)
+	</select>
+
+	<select id="countAllPrograms" resultType="int">
+		SELECT COUNT(*) FROM
+		PROGRAM
+	</select>
+
+	<select id="countAllApplicants" resultType="int">
+		SELECT COUNT(*) FROM
+		PROGRAM_ENROLL
+	</select>
+
+	<select id="countThisMonthApplicants" resultType="int">
+		SELECT COUNT(*)
+		FROM PROGRAM_ENROLL
+		WHERE TO_CHAR(TO_DATE(APPLY_DATE, 'YYYY-MM-DD'),
+		'YYYY-MM') =
+		TO_CHAR(SYSDATE, 'YYYY-MM')
+		AND IS_ATTENDED = 'Y'
+	</select>
+
+
+	<select id="calculateCompleteRate" resultType="int">
+		SELECT
+		CASE
+		WHEN
+		total = 0 THEN 0
+		ELSE ROUND(complete * 100 / total)
+		END AS COMPLETE_RATE
+		FROM (
+		SELECT
+		(SELECT COUNT(*) FROM PROGRAM WHERE PROGRAM_ACTIVE = 'C')
+		AS complete
+		, (SELECT COUNT(*) FROM PROGRAM) AS total
+		FROM DUAL
+		)
+	</select>
+
+
+	<insert id="insertStatistics"
+		parameterType="kr.or.ddit.pfcp.common.vo.ProgramStatisticsVO">
+		MERGE INTO PROGRAM_STATISTICS PS
+		USING DUAL
+		ON (PS.STAT_DATE = TO_DATE(#{statDate}, 'YYYY-MM-DD'))
+		WHEN MATCHED THEN
+		UPDATE SET
+		TOTAL_PROGRAMS = #{totalPrograms},
+		TOTAL_APPLICANTS = #{totalApplicants},
+		MONTHLY_APPLY = #{monthlyApply},
+		COMPLETE_RATE = #{completeRate}
+		WHEN NOT MATCHED THEN
+		INSERT (
+		STAT_NO,
+		STAT_DATE,
+		TOTAL_PROGRAMS,
+		TOTAL_APPLICANTS,
+		MONTHLY_APPLY,
+		COMPLETE_RATE,
+		REG_DATE
+		) VALUES (
+		'STATIS' || LPAD(STAT_NO_SEQ.NEXTVAL, 6, '0'),
+		TO_DATE(#{statDate}, 'YYYY-MM-DD'),
+		#{totalPrograms},
+		#{totalApplicants},
+		#{monthlyApply},
+		#{completeRate},
+		SYSDATE
+		)
+	</insert>
+
+</mapper>

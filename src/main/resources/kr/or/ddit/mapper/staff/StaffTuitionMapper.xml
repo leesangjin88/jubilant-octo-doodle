@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.tuition.mapper.StaffTuitionMapper">
+
+<resultMap id="collegeResultMap" type="CollegeVO" autoMapping="true">
+	<id property="collegeNo" column="COLLEGE_NO" />
+	<result property="collegeName" column="COLLEGE_NAME" />
+
+
+	<!-- Department Association -->
+	<association property="department" javaType="kr.or.ddit.pfcp.common.vo.DepartmentVO" autoMapping="true" />
+	
+</resultMap>
+
+
+	<select id="selectCollegeList" resultMap="collegeResultMap">
+		SELECT 
+		    C.COLLEGE_NO,
+		    C.COLLEGE_NAME,
+		    COUNT(D.DEPARTMENT_NO) AS DCOUNT
+		FROM 
+		    COLLEGE C
+		LEFT JOIN 
+		    DEPARTMENT D ON C.COLLEGE_NO = D.COLLEGE_NO
+		GROUP BY 
+		    C.COLLEGE_NO, C.COLLEGE_NAME
+		ORDER BY 
+		    C.COLLEGE_NO
+		
+	</select>
+	
+	<select id="selectDepartmentsByCollegeNo">
+		SELECT
+		    DEPARTMENT_NO,
+		    DEPARTMENT_NAME,
+		    DEPARTMENT_TUITION,
+		    DGR_NO,
+		    COLLEGE_NO,
+		    DEPARTMENT_DESC,
+		    DEL_YN
+		FROM
+		    DEPARTMENT
+		WHERE COLLEGE_NO=#{colleageNo}
+	</select>
+</mapper>

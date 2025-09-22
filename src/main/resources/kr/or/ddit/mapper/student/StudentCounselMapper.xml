@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.student.counsel.mapper.StudentCounselMapper">
+	<resultMap id="counselReqMap" type="kr.or.ddit.pfcp.common.vo.CounselReqVO">
+	    <id property="counselReqno" column="COUNSEL_REQNO"/>
+	    <result property="preferredDate" column="PREFERRED_DATE"/>
+	    <result property="typeCode" column="TYPE_CODE"/>
+	    <result property="userNo" column="USER_NO"/>
+	    <result property="status" column="STATUS"/>
+	    <result property="counselReqdate" column="COUNSEL_REQDATE"/>
+	    <result property="counselComment" column="COUNSEL_COMMENT"/>
+	    <result property="reqType" column="REQ_TYPE"/>
+	    
+	    <association property="type" javaType="kr.or.ddit.pfcp.common.vo.TypeVO">
+	        <id property="typeCode" column="TYPE_CODE"/>
+	        <result property="typeName" column="TYPE_NAME"/>
+	    </association>
+	</resultMap>
+	
+	<insert id="insertStudentCounsel">
+		INSERT INTO COUNSEL_REQ (
+			COUNSEL_REQNO, 
+			PREFERRED_DATE, 
+			TYPE_CODE, 
+			USER_NO, 
+			STATUS, 
+			COUNSEL_REQDATE, 
+			COUNSEL_COMMENT,
+			REQ_TYPE
+		)
+		VALUES (
+			'CR' || LPAD(COUNSEL_REQ_SEQ.NEXTVAL, 8, '0'),
+			#{preferredDate},
+			#{typeCode},
+			#{userNo},
+			'대기',
+			TO_CHAR(SYSDATE, 'YYYY-MM-DD'),
+			#{counselComment},
+			#{reqType}
+		)
+	</insert>
+
+	<select id="selectStudentDepartmentCounselList" resultMap="counselReqMap" parameterType="String">
+		SELECT COUNSEL_REQNO, 
+		       SUBSTR(PREFERRED_DATE, 1, 10) AS PREFERRED_DATE,
+		       TYPE_CODE, 
+		       TYPE_NAME,
+		       USER_NO, 
+		       STATUS, 
+		       COUNSEL_REQDATE, 
+		       COUNSEL_COMMENT,
+		       REQ_TYPE
+		  FROM COUNSEL_REQ
+  NATURAL JOIN TYPE
+		 WHERE USER_NO=#{userNo}
+		   AND TYPE_CODE='CN_DEPT'
+		   AND STATUS='대기' OR STATUS='승인'
+	  ORDER BY COUNSEL_REQDATE DESC
+	</select>
+	
+	<select id="selectStudentEmploymentCounselList" resultMap="counselReqMap" parameterType="String">
+		SELECT COUNSEL_REQNO, 
+		       SUBSTR(PREFERRED_DATE, 1, 10) AS PREFERRED_DATE, 
+		       TYPE_CODE, 
+		       TYPE_NAME,
+		       USER_NO, 
+		       STATUS, 
+		       COUNSEL_REQDATE, 
+		       COUNSEL_COMMENT,
+		       REQ_TYPE
+		  FROM COUNSEL_REQ
+  NATURAL JOIN TYPE
+		 WHERE USER_NO=#{userNo}
+		   AND TYPE_CODE='CN_EMP'
+		   AND STATUS='대기' OR STATUS='승인'
+	  ORDER BY COUNSEL_REQDATE DESC
+	</select>
+	
+	<update id="deleteStudentDepartmentCounselList">
+		UPDATE COUNSEL_REQ
+		   SET STATUS='삭제'
+		 WHERE COUNSEL_REQNO=#{counselReqno}
+	</update>
+</mapper>

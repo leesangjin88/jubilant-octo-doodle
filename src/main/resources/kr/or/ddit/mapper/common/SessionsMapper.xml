@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.common.zoomapi.mapper.SessionsMapper">
+ <!-- ResultMap 정의 -->
+	<resultMap id="SessionsResultMap"
+    type="kr.or.ddit.common.zoomapi.vo.SessionsVO">
+
+    <id property="sessionNo" column="SESSION_NO" />
+    <result property="sessionTitle" column="SESSION_TITLE" />
+    <result property="sessionType" column="SESSION_TYPE" />
+    <result property="startDate" column="startDate" />
+    <result property="sessionTh" column="SESSION_TH" />
+    <result property="attendanceRequired" column="ATTENDANCE_REQUIRED" />
+    <result property="zoomMeetingId" column="ZOOM_MEETING_ID" />
+    <result property="joinUrl" column="JOIN_URL" />
+    <result property="joinPassword" column="JOIN_PASSWORD" />
+    <result property="hostEmail" column="HOST_EMAIL" />
+    <result property="timezone" column="TIMEZONE" />
+    <result property="agenda" column="AGENDA" />
+    <result property="lecNo" column="LEC_NO" />
+    <result property="userNo" column="USER_NO" />
+
+    <!-- User Info -->
+    <association property="user" javaType="UserVO">
+        <id property="userNo" column="USER_NO" />
+        <result property="userName" column="USER_NAME" />
+        <result property="userRole" column="USER_ROLE" />
+    </association>
+
+    <!-- Lecture Info -->
+    <association property="lecture" javaType="LectureVO">
+        <id property="lecNo" column="LEC_NO" />
+        <result property="reqNo" column="REQ_NO" />
+        <result property="currentEnrollment" column="CURRENT_ENROLLMENT" />
+        <result property="lecStatus" column="LEC_STATUS" />
+        <result property="lrNo" column="LR_NO" />
+        <result property="userNo" column="LECTURE_USER_NO" />
+
+        <!-- Subject Info -->
+        <association property="subject" javaType="SubjectVO">
+            <id property="subjectCode" column="SUBJECT_CODE" />
+            <result property="departmentNo" column="DEPARTMENT_NO" />
+            <result property="gradeLevel" column="GRADE_LEVEL" />
+            <result property="subjectName" column="SUBJECT_NAME" />
+            <result property="credit" column="CREDIT" />
+            <result property="subjectDesp" column="SUBJECT_DESP" />
+            <result property="semesterNo" column="SEMESTER_NO" />
+        </association>
+        
+        <association property="lectureReq" javaType="LectureReqVO">
+        	<result property="lecName" column="LEC_NAME" />
+        </association>
+    </association>
+</resultMap>
+	
+	<insert id="insertSession" parameterType="kr.or.ddit.common.zoomapi.vo.SessionsVO">
+	    <selectKey keyProperty="sessionNo" resultType="int" order="BEFORE">
+	        SELECT sessions_seq.NEXTVAL FROM DUAL
+	    </selectKey>
+	    INSERT INTO sessions (
+	        SESSION_NO, SESSION_TITLE, SESSION_TYPE, START_DATE, SESSION_TH, ATTENDANCE_REQUIRED,
+	        ZOOM_MEETING_ID, JOIN_URL, JOIN_PASSWORD, HOST_EMAIL,
+	        TIMEZONE, AGENDA, CREATED_AT, UPDATED_AT, STATUS, USER_NO, LEC_NO
+	    ) VALUES (
+	        #{sessionNo}, #{sessionTitle}, #{sessionType},
+	         TO_TIMESTAMP(#{startDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+	        #{sessionTh}, #{attendanceRequired},
+	        #{zoomMeetingId}, #{joinUrl}, #{joinPassword}, #{hostEmail},
+	        #{timezone}, #{agenda}, SYSDATE, SYSDATE, 'ACTIVE', #{userNo}, #{lecNo}
+	    )
+	</insert>
+	
+	<select id="selectSessions" resultMap="SessionsResultMap">
+		SELECT
+		    S.SESSION_NO,
+		    S.SESSION_TITLE,
+		    S.SESSION_TYPE,
+		    TO_CHAR(S.START_DATE, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS startDate,
+		    S.SESSION_TH,
+		    S.ATTENDANCE_REQUIRED,
+		    S.ZOOM_MEETING_ID,
+		    S.JOIN_URL,
+		    S.JOIN_PASSWORD,
+		    S.HOST_EMAIL,
+		    S.TIMEZONE,
+		    S.AGENDA,
+		    TO_CHAR(S.CREATED_AT, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS createdAt,
+		    S.STATUS,
+		    S.USER_NO,
+		    L.LEC_NO,
+		    L.REQ_NO,
+		    L.CURRENT_ENROLLMENT,
+		    L.LEC_STATUS,
+		    L.LR_NO,
+		    LR.LEC_NAME,
+		    SUB.SUBJECT_CODE,
+		    SUB.DEPARTMENT_NO,
+		    SUB.GRADE_LEVEL,
+		    SUB.SUBJECT_NAME,
+		    SUB.CREDIT,
+		    SUB.SUBJECT_DESP,
+		    SUB.SEMESTER_NO,
+		    U.USER_NAME,
+		    U.USER_ROLE
+		FROM SESSIONS S
+		JOIN LECTURE L ON S.LEC_NO = L.LEC_NO
+		JOIN LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO
+		JOIN SUBJECT SUB ON LR.SUBJECT_CODE = SUB.SUBJECT_CODE
+		JOIN TB_USER U ON S.USER_NO = U.USER_NO
+		WHERE S.STATUS = 'ACTIVE'
+		    AND EXISTS (
+		        SELECT 1
+		        FROM LECTURE_ENR LE
+		        WHERE LE.LEC_NO = L.LEC_NO
+		        AND LE.USER_NO = #{userNo}
+		    )
+		ORDER BY S.CREATED_AT DESC
+	</select>
+	
+	<select id="selectSessionsByProfNo" resultMap="SessionsResultMap">
+		SELECT
+		    S.SESSION_NO,
+		    S.SESSION_TITLE,
+		    S.SESSION_TYPE,
+		    TO_CHAR(S.START_DATE, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS startDate,
+		    S.SESSION_TH,
+		    S.ATTENDANCE_REQUIRED,
+		    S.ZOOM_MEETING_ID,
+		    S.JOIN_URL,
+		    S.JOIN_PASSWORD,
+		    S.HOST_EMAIL,
+		    S.TIMEZONE,
+		    S.AGENDA,
+		    TO_CHAR(S.CREATED_AT, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS createdAt,
+		    S.STATUS,
+		    S.USER_NO,
+		    L.LEC_NO,
+		    L.REQ_NO,
+		    L.CURRENT_ENROLLMENT,
+		    L.LEC_STATUS,
+		    L.LR_NO,
+		    LR.LEC_NAME
+		
+		    SUB.SUBJECT_CODE,
+		    SUB.DEPARTMENT_NO,
+		    SUB.GRADE_LEVEL,
+		    SUB.SUBJECT_NAME,
+		    SUB.CREDIT,
+		    SUB.SUBJECT_DESP,
+		    SUB.SEMESTER_NO,
+		
+		    U.USER_NAME,
+		    U.USER_ROLE
+		
+		FROM SESSIONS S
+		JOIN LECTURE L ON S.LEC_NO = L.LEC_NO
+		JOIN LECTURE_REQ LR ON L.REQ_NO = LR.REQ_NO
+		JOIN SUBJECT SUB ON LR.SUBJECT_CODE = SUB.SUBJECT_CODE
+		JOIN TB_USER U ON S.USER_NO = U.USER_NO
+		WHERE S.STATUS = 'ACTIVE'
+		ORDER BY S.CREATED_AT DESC
+	</select>
+	
+	<update id="updateSession">
+		UPDATE SESSIONS
+		   SET STATUS='DEACTIVATE'
+		 WHERE SESSION_NO=#{sessionNo}
+		   AND USER_NO=#{userNo}
+	</update>
+</mapper>

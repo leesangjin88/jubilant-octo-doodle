@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCMS CSS 스타일 데모</title>
+    <style>
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            margin-bottom: 3rem;
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-row > * {
+            flex: 1;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+    
+    <link rel="stylesheet" href="/dist/assets/css/bodyFormat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body>
+    <div class="container">
+        <h1 class="pageTitle">LCMS CSS 스타일 가이드 데모</h1>
+        
+        <!-- 알림 박스 -->
+        <div class="section">
+            <h2 class="sectionTitle">알림 박스</h2>
+            <div class="noticeBox noticeInfo">
+                <strong>정보:</strong> 이것은 정보 알림 박스입니다.
+            </div>
+            <div class="noticeBox noticeWarning">
+                <strong>경고:</strong> 이것은 경고 알림 박스입니다.
+            </div>
+            <div class="noticeBox noticeError">
+                <strong>에러:</strong> 이것은 에러 알림 박스입니다.
+            </div>
+            <div class="noticeBox noticeSuccess">
+                <strong>성공:</strong> 이것은 성공 알림 박스입니다.
+            </div>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="section">
+            <h2 class="sectionTitle">버튼</h2>
+            <div class="button-group">
+                <button class="submitButton">등록</button>
+                <button class="editButton">수정</button>
+                <button class="deleteButton">삭제</button>
+                <button class="saveButton">저장</button>
+                <button class="cancelButton">취소</button>
+                <button class="searchButton">검색</button>
+            </div>
+        </div>
+
+        <!-- 탭 -->
+        <div class="section">
+            <h2 class="sectionTitle">탭</h2>
+            <div class="tabContainer">
+                <button class="tabButton tabButtonActive">시설 관리</button>
+                <button class="tabButton">구성원 관리</button>
+                <button class="tabButton">수업 관리</button>
+                <button class="tabButton">학생 관리</button>
+            </div>
+        </div>
+
+        <!-- 필터 버튼 -->
+        <div class="section">
+            <h2 class="sectionTitle">필터 버튼</h2>
+            <div class="button-group">
+                <button class="filterButton active">전체</button>
+                <button class="filterButton">강의실</button>
+                <button class="filterButton">회의실</button>
+                <button class="filterButton">자습실</button>
+            </div>
+        </div>
+
+        <!-- 폼 요소 -->
+        <div class="section">
+            <h2 class="sectionTitle">폼 요소</h2>
+            <div class="card">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="inputLabel">시설명</label>
+                        <input type="text" class="inputField" placeholder="시설명을 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label class="inputLabel">시설 유형</label>
+                        <select class="selectBox">
+                            <option class="selectOption">강의실</option>
+                            <option class="selectOption">회의실</option>
+                            <option class="selectOption">자습실</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="inputLabel">위치</label>
+                        <input type="text" class="inputField" placeholder="위치를 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label class="inputLabel">수용 인원</label>
+                        <input type="number" class="inputField" placeholder="수용 인원">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="inputLabel">설명</label>
+                    <textarea class="textareaField" placeholder="시설 설명을 입력하세요"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="inputLabel">
+                        <input type="checkbox" class="checkbox"> 바로 공개
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 검색바 -->
+        <div class="section">
+            <h2 class="sectionTitle">검색</h2>
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" class="searchBar" placeholder="시설명 또는 시설 유형으로 검색">
+                <button class="searchButton">검색</button>
+            </div>
+        </div>
+
+        <!-- 테이블 -->
+        <div class="section">
+            <h2 class="sectionTitle">테이블</h2>
+            <div class="tableContainer">
+                <table class="defaultTable">
+                    <thead class="tableHead">
+                        <tr>
+                            <th class="tableTh">시설명</th>
+                            <th class="tableTh">시설 유형</th>
+                            <th class="tableTh">위치</th>
+                            <th class="tableTh">수용 인원</th>
+                            <th class="tableTh">상태</th>
+                            <th class="tableTh">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="tableRowHover tableRowStripe">
+                            <td class="tableTd">대형강의실A</td>
+                            <td class="tableTd">강의실</td>
+                            <td class="tableTd">본관 3층 301호</td>
+                            <td class="tableTd">121</td>
+                            <td class="tableTd">
+                                <span class="badge badgeGreen">사용 가능</span>
+                            </td>
+                            <td class="tableTd">
+                                <div class="button-group">
+                                    <button class="editButton">수정</button>
+                                    <button class="deleteButton">삭제</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="tableRowHover tableRowStripe">
+                            <td class="tableTd">중형강의실B</td>
+                            <td class="tableTd">강의실</td>
+                            <td class="tableTd">본관 3층 302호</td>
+                            <td class="tableTd">80</td>
+                            <td class="tableTd">
+                                <span class="badge badgeYellow">점검 중</span>
+                            </td>
+                            <td class="tableTd">
+                                <div class="button-group">
+                                    <button class="editButton">수정</button>
+                                    <button class="deleteButton">삭제</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="tableRowHover tableRowStripe">
+                            <td class="tableTd">소형강의실C</td>
+                            <td class="tableTd">강의실</td>
+                            <td class="tableTd">본관 3층 303호</td>
+                            <td class="tableTd">40</td>
+                            <td class="tableTd">
+                                <span class="badge badgeRed">사용 불가</span>
+                            </td>
+                            <td class="tableTd">
+                                <div class="button-group">
+                                    <button class="editButton">수정</button>
+                                    <button class="deleteButton">삭제</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="tableRowHover tableRowStripe">
+                            <td class="tableTd">임원회의실</td>
+                            <td class="tableTd">회의실</td>
+                            <td class="tableTd">본관 5층 501호</td>
+                            <td class="tableTd">20</td>
+                            <td class="tableTd">
+                                <span class="badge badgeBlue">예약됨</span>
+                            </td>
+                            <td class="tableTd">
+                                <div class="button-group">
+                                    <button class="editButton">수정</button>
+                                    <button class="deleteButton">삭제</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 배지 -->
+        <div class="section">
+            <h2 class="sectionTitle">배지/태그</h2>
+            <div class="demo-grid">
+                <div>
+                    <span class="badge badgeBlue">파란색</span>
+                    <span class="badge badgeGreen">녹색</span>
+                    <span class="badge badgeYellow">노란색</span>
+                    <span class="badge badgeRed">빨간색</span>
+                    <span class="badge badgeGray">회색</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="section">
+            <h2 class="sectionTitle">페이지네이션</h2>
+            <div class="pagination">
+                <button class="pageButton">이전</button>
+                <button class="pageButton active">1</button>
+                <button class="pageButton">2</button>
+                <button class="pageButton">3</button>
+                <button class="pageButton">4</button>
+                <button class="pageButton">5</button>
+                <button class="pageButton">다음</button>
+            </div>
+        </div>
+
+        <!-- 카드 -->
+        <div class="section">
+            <h2 class="sectionTitle">카드</h2>
+            <div class="demo-grid">
+                <div class="card">
+                    <h3 class="sectionTitle">시설 통계</h3>
+                    <p>현재 등록된 시설: <strong>24개</strong></p>
+                    <p>사용 가능한 시설: <strong>18개</strong></p>
+                    <p>점검 중인 시설: <strong>3개</strong></p>
+                    <p>사용 불가 시설: <strong>3개</strong></p>
+                </div>
+                <div class="card">
+                    <h3 class="sectionTitle">최근 활동</h3>
+                    <p>새로운 시설 등록: <span class="badge badgeGreen">2건</span></p>
+                    <p>예약 요청: <span class="badge badgeBlue">5건</span></p>
+                    <p>점검 완료: <span class="badge badgeYellow">1건</span></p>
+                    <p>문제 신고: <span class="badge badgeRed">0건</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 툴팁 -->
+        <div class="section">
+            <h2 class="sectionTitle">툴팁</h2>
+            <div class="tooltip">
+                <span>이 텍스트에 마우스를 올려보세요</span>
+                <span class="tooltipText">이것은 툴팁입니다!</span>
+            </div>
+        </div>
+
+        <!-- 로딩 스피너 -->
+        <div class="section">
+            <h2 class="sectionTitle">로딩 스피너</h2>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div class="spinner"></div>
+                <span>데이터를 불러오는 중...</span>
+            </div>
+        </div>
+
+        <!-- 종합 예시 -->
+        <div class="section">
+            <h2 class="sectionTitle">종합 예시 - 시설 등록 폼</h2>
+            <div class="card">
+                <div class="noticeBox noticeInfo">
+                    새로운 시설을 등록하려면 아래 정보를 모두 입력해 주세요.
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="inputLabel">시설명 *</label>
+                        <input type="text" class="inputField" placeholder="예: 대형강의실A">
+                    </div>
+                    <div class="form-group">
+                        <label class="inputLabel">시설 유형 *</label>
+                        <select class="selectBox">
+                            <option class="selectOption">시설 유형 선택</option>
+                            <option class="selectOption">강의실</option>
+                            <option class="selectOption">회의실</option>
+                            <option class="selectOption">자습실</option>
+                            <option class="selectOption">실습실</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="inputLabel">건물</label>
+                        <input type="text" class="inputField" placeholder="예: 본관">
+                    </div>
+                    <div class="form-group">
+                        <label class="inputLabel">층</label>
+                        <input type="text" class="inputField" placeholder="예: 3층">
+                    </div>
+                    <div class="form-group">
+                        <label class="inputLabel">호실</label>
+                        <input type="text" class="inputField" placeholder="예: 301호">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="inputLabel">수용 인원</label>
+                        <input type="number" class="inputField" placeholder="예: 50">
+                    </div>
+                    <div class="form-group">
+                        <label class="inputLabel">상태</label>
+                        <select class="selectBox">
+                            <option class="selectOption">사용 가능</option>
+                            <option class="selectOption">점검 중</option>
+                            <option class="selectOption">사용 불가</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="inputLabel">시설 설명</label>
+                    <textarea class="textareaField" placeholder="시설에 대한 상세한 설명을 입력하세요..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="inputLabel">
+                        <input type="checkbox" class="checkbox"> 바로 공개
+                    </label>
+                </div>
+                
+                <div class="button-group">
+                    <button class="submitButton">등록</button>
+                    <button class="saveButton">임시저장</button>
+                    <button class="cancelButton">취소</button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="inputLabel">파일 첨부</label>
+                    <a href="/path/to/your/download/file.pdf" download class="download-button">
+                        <i class="fas fa-download"></i> 파일명.pdf (1.2MB)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

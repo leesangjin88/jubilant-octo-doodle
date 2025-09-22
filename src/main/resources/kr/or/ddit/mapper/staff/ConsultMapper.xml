@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.pfcp.staff.consult.mapper.ConsultMapper">
+
+	<select id="selectConsultScheduleByUserNo" parameterType="String" resultType="kr.or.ddit.pfcp.common.vo.ReservationTimestampVO">
+		SELECT
+		    RESERVATION_ID,
+		    RESERVATION_DAY,
+		    START_HOUR,
+		    RESERVATION_TYPE,
+		    USER_NO,
+		    FACILITY_NO
+		FROM
+		    RESERVATION_TIMESTAMP
+		WHERE USER_NO = #{userNo} AND RESERVATION_TYPE = 'CONSULT'
+	</select>
+
+	<delete id="deleteConsultScheduleByUserNo" parameterType="String">
+	   DELETE FROM RESERVATION_TIMESTAMP
+		WHERE USER_NO = #{userNo} AND RESERVATION_TYPE = 'CONSULT'
+	</delete>
+
+	<insert id="insertConsultSchedule" parameterType="kr.or.ddit.pfcp.common.vo.ReservationTimestampVO">
+	     INSERT INTO RESERVATION_TIMESTAMP (
+	     		RESERVATION_ID, 
+	     		RESERVATION_DAY, 
+	     		START_HOUR, 
+	     		RESERVATION_TYPE, 
+	     		USER_NO)
+		VALUES (
+		    #{reservationDay} || #{startHour} || '-' || #{userNo},
+		    #{reservationDay},
+		    #{startHour},
+		    'CONSULT', #{userNo}
+		)
+	</insert>
+
+</mapper>
